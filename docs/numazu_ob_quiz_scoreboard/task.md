@@ -58,7 +58,7 @@
 - [ ] GAS（スプレッドシート連携・締切判定） — entry-dev
 
 ## 3. 検証
-- [ ] ルール仕様とエンジンの突き合わせレビュー — qa-reviewer
+- [x] ルール仕様とエンジンの突き合わせレビュー — qa-reviewer（review_engine.md。重大2・中5・軽微3）
 - [ ] E2E（Playwright）通しシナリオ 1R→F — qa-reviewer
 - [ ] Windows＋デュアルモニター実機確認チェックリスト — qa-reviewer
 - [ ] 初見ユーザーによる操作テスト — qa-reviewer
