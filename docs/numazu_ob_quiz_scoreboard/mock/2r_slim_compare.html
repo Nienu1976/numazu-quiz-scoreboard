@@ -1,0 +1,134 @@
+<title>2R 競り札 引き算案</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Big+Shoulders+Stencil+Display:wght@700;900&family=BIZ+UDPGothic:wght@700&display=swap" rel="stylesheet">
+<style>
+/* VOICE work（比較検討用）
+   IDEA v1の競り札の見た目を保ったまま、札に載せる情報を引き算した3案を並べる
+   PICTURE 選択中の案を16:9で大きく、下に3案のサムネイル
+   COLOUR v1と同じ（藍の地・生成りの札・黒板・船体の赤・プレート色は帯のみ）
+   TYPE v1と同じ（Dela Gothic One＋Big Shoulders Stencil）
+   LAYOUT 上に大きなプレビュー、下に3列の一覧（スマホでは1列） */
+:root{color-scheme:dark;--ai:#0e2240;--sea:#0a1a33;--kinari:#e9dfc6;--shiro:#f6f3ec;--aka:#c8102e;--sabi:#8c3f1e;--koku:#1f2b26;--chalk:#eef0e6;--sig:#3ee08f;--ink:#141414;--p-r:#c8102e;--p-b:#2058b8;--p-y:#f0b400;--p-g:#1d8a4b}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0}
+body{background:#1b1b1d;color:#ecebe7;font:15px/1.6 "BIZ UDPGothic",sans-serif}
+.in{padding:20px max(4vw,16px,env(safe-area-inset-right,0px)) 40px max(4vw,16px,env(safe-area-inset-left,0px));max-width:1500px;margin:0 auto}
+h1{font-size:24px;margin:0 0 4px;line-height:1.3}
+.lead{color:#9a9890;margin:0 0 16px;font-size:14px}
+.big{width:min(100%,calc(76vh*16/9))}
+.cap{margin:10px 0 24px;font-size:14px;color:#c9c6bd}
+.cap b{font-size:17px;color:#ecebe7;margin-right:12px}
+.mx{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.th{cursor:pointer;border:0;padding:0;background:none;color:inherit;text-align:left;font:inherit;outline:3px solid transparent;outline-offset:3px}
+.th[aria-pressed=true]{outline-color:#e8e4d8}
+.th:hover{outline-color:#6d6a62}
+.th span{display:block;margin-top:8px;font-size:14px}
+@media(max-width:700px){.mx{grid-template-columns:minmax(0,1fr)}}
+/* ===== 投影画面 ===== */
+.scr{position:relative;container-type:inline-size;width:100%;aspect-ratio:16/9;background:var(--ai);overflow:hidden}
+.scr *{line-height:1}
+.hd{position:absolute;left:2cqw;right:2cqw;top:1.6cqw;height:7cqw;display:flex;gap:1.6cqw}
+.no{background:var(--shiro);color:var(--ink);border:.5cqw solid var(--aka);width:7cqw;display:grid;place-items:center;font:900 5cqw "Big Shoulders Stencil Display",Impact,sans-serif}
+.tt{display:flex;flex-direction:column;justify-content:center;gap:.8cqw;color:var(--shiro)}
+.tt h2{margin:0;font:400 2.9cqw "Dela Gothic One",sans-serif}
+.tt p{margin:0;font:700 1.3cqw "BIZ UDPGothic",sans-serif;color:#c9bfa6}
+.tt p b{font:900 1.8cqw "Big Shoulders Stencil Display",sans-serif;color:var(--shiro);margin:0 .3cqw}
+.rail{margin-left:auto;display:flex;gap:.6cqw}
+.rail .lb{writing-mode:vertical-rl;background:var(--aka);color:var(--shiro);font:400 1.5cqw "Dela Gothic One",sans-serif;display:grid;place-items:center;padding:0 .5cqw}
+.slot{width:8.4cqw;border:.25cqw dashed #4a6489;display:grid;place-items:center;color:#4a6489;font:900 2.4cqw "Big Shoulders Stencil Display",sans-serif}
+.slot.f{border:.25cqw solid var(--shiro);background:var(--shiro);color:var(--ink);font:400 1.5cqw "Dela Gothic One",sans-serif}
+.grid{position:absolute;left:2cqw;right:2cqw;top:12.6cqw;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));column-gap:1.4cqw;row-gap:4cqw}
+.card{position:relative;height:17.2cqw}
+.face{position:absolute;inset:0;border:.22cqw solid #000}
+.front{background:var(--kinari);color:var(--ink);display:flex;flex-direction:column}
+.band{height:3.2cqw;display:flex;align-items:center;padding:0 .8cqw;color:var(--shiro)}
+.r .band{background:var(--p-r)}.b .band{background:var(--p-b)}.y .band{background:var(--p-y);color:var(--ink)}.g .band{background:var(--p-g)}
+.seat{font:900 2.6cqw "Big Shoulders Stencil Display",sans-serif}
+.nm{font:400 2.1cqw "Dela Gothic One",sans-serif;padding:1.1cqw .8cqw 0;white-space:nowrap;overflow:hidden;letter-spacing:-.02em}
+.ki{font:700 1.15cqw "BIZ UDPGothic",sans-serif;padding:.5cqw .8cqw 0;color:#5a5244}
+.tag{margin:auto .8cqw .8cqw;background:var(--koku);color:var(--chalk);height:6.6cqw;display:flex;align-items:center;justify-content:space-between;padding:0 .9cqw}
+.num{font:900 6cqw "Big Shoulders Stencil Display",sans-serif}
+.num small{font:400 1.6cqw "Dela Gothic One",sans-serif;margin-left:.3cqw;color:#b9c2b2}
+.pips{display:flex;gap:.35cqw}
+.pips i{width:1.35cqw;height:3.4cqw;border:max(.2cqw,1px) solid #6f7c72;display:block}
+.pips i.on{background:var(--chalk);border-color:var(--chalk)}
+.xs{display:flex;flex-direction:column;gap:.4cqw}
+.xs.h{flex-direction:row}
+.xs i{width:2cqw;height:2cqw;border:.2cqw solid #8a7e6e;display:grid;place-items:center;font:900 1.7cqw "BIZ UDPGothic",sans-serif;font-style:normal;color:transparent}
+.xs i.on{background:var(--sabi);border-color:var(--sabi);color:var(--kinari)}
+/* 連答権 = 信号灯 */
+.mast{position:absolute;right:1.4cqw;top:-3.6cqw;width:2.4cqw;height:3.6cqw;z-index:2}
+.mast::before{content:"";position:absolute;left:1.05cqw;top:2cqw;width:.3cqw;height:1.6cqw;background:#000}
+.lamp{position:absolute;left:.2cqw;top:0;width:2cqw;height:2cqw;background:#33425a;border:.22cqw solid #000}
+.beam{position:absolute;top:-.3cqw;width:4.2cqw;height:2.6cqw;background:var(--sig);opacity:0}
+.beam.l{right:2.4cqw;clip-path:polygon(100% 40%,0 0,0 100%,100% 60%)}
+.beam.rr{left:2.4cqw;clip-path:polygon(0 40%,100% 0,100% 100%,0 60%)}
+.rt .lamp{background:var(--sig)}
+.rt .beam{opacity:.55}
+.rt .front{outline:.35cqw solid var(--sig);outline-offset:.15cqw}
+.nolamp .mast{display:none}
+/* 勝抜・失格 */
+.stamp{position:absolute;left:50%;top:54%;width:9cqw;height:9cqw;margin:-4.5cqw 0 0 -4.5cqw;background:var(--aka);color:var(--shiro);border:.4cqw solid var(--shiro);outline:.3cqw solid var(--aka);display:none;place-items:center;font:400 3.2cqw "Dela Gothic One",sans-serif;writing-mode:vertical-rl;transform:rotate(-10deg);z-index:3}
+.win .stamp{display:grid}
+.win .front{background:var(--shiro)}
+.out .front{display:none}
+.back{display:none;padding-bottom:3cqw;background:var(--sabi);color:var(--kinari);flex-direction:column;align-items:center;justify-content:center;gap:1cqw}
+.out .back{display:flex}
+.out{translate:0 .7cqw}
+.back .big{align-self:center;width:auto;font:400 3.4cqw "Dela Gothic One",sans-serif;border:.3cqw solid var(--kinari);padding:.6cqw .8cqw}
+.back .n2{font:400 1.4cqw "Dela Gothic One",sans-serif;opacity:.8}
+.sea{position:absolute;left:-.3cqw;right:-.3cqw;bottom:-.3cqw;height:0;background:var(--sea);clip-path:polygon(0 1.2cqw,8% 0,16% 1.2cqw,24% 0,32% 1.2cqw,40% 0,48% 1.2cqw,56% 0,64% 1.2cqw,72% 0,80% 1.2cqw,88% 0,96% 1.2cqw,100% .4cqw,100% 100%,0 100%);z-index:2}
+.out .sea{height:20%}
+.out .mast{opacity:.25}
+</style>
+
+<div class="in">
+  <h1>2R 競り札：情報の引き算 3案</h1>
+  <p class="lead">v1の見た目のまま、札に載せる情報を減らしました。3案とも同じ試合途中の状態です（05 千本松が勝抜、04 ひものが失格、09 狩野川が連答権）。v1から外したもの：札の穴、「○札」ラベル、「あと○」、○メーターと数字の二重表示、「落札」の言葉（→「勝抜」）。</p>
+  <div class="big" id="big"></div>
+  <div class="cap" id="cap"></div>
+  <div class="mx" id="mx"></div>
+</div>
+
+<script>
+{
+const P = [["しおかぜ",48,"g",0,0],["ぬまっこ",52,"b",3,1],["カツオ番長",39,"y",1,0],["ひもの",55,"g",0,2],["千本松",44,"r",5,0],["香貫山",50,"g",2,0],
+  ["ゆりかもめ",57,"y",1,1],["アジフライ",46,"g",0,0],["狩野川",41,"b",3,0],["深海魚",53,"g",0,1],["びゅうお",49,"y",2,0],["我入道",58,"g",0,0]];
+const HOLD = 8;
+const V = {
+  S1:{name:"S1 最小", desc:"席番・名前・○の数字・×だけ。連答権は信号灯。", ki:false, mode:"num"},
+  S2:{name:"S2 最小＋卒業期", desc:"S1に卒業期を足した案。OB会らしさは出るが、文字が1行増える。", ki:true, mode:"num"},
+  S3:{name:"S3 数字なし・5マス", desc:"○を数字ではなく5マスの札で見せる。あと何問で勝抜けかが直感でわかる。", ki:false, mode:"pips"}
+};
+const pad = i => String(i+1).padStart(2,"0");
+const xs = (x, h) => `<span class="xs ${h?"h":""}">${[0,1].map(k => `<i class="${k<x?"on":""}">×</i>`).join("")}</span>`;
+const card = (v, [n,k,c,o,x], i) => {
+  const st = o >= 5 ? "win" : x >= 2 ? "out" : "";
+  const val = v.mode === "num"
+    ? `<span class="num">${o}<small>○</small></span>${xs(x)}`
+    : `<span class="pips">${Array.from({length:5}, (_,j) => `<i class="${j<o?"on":""}"></i>`).join("")}</span>${xs(x)}`;
+  return `<div class="card ${c} ${st} ${i===HOLD?"rt":""}">
+    <div class="mast"><i class="beam l"></i><i class="beam rr"></i><div class="lamp"></div></div>
+    <div class="face front"><div class="band"><span class="seat">${pad(i)}</span></div>
+      <div class="nm">${n}</div>${v.ki?`<div class="ki">第${k}期</div>`:""}
+      <div class="tag">${val}</div></div>
+    <div class="face back"><span class="big">失格</span><span class="n2">${pad(i)} ${n}</span></div>
+    <div class="sea"></div><div class="stamp">勝抜</div></div>`;
+};
+const scr = key => { const v = V[key]; return `<div class="scr">
+  <div class="hd"><div class="no">2R</div><div class="tt"><h2>連答つき 5○2×</h2><p>第1組<b>14</b>問目</p></div>
+  <div class="rail"><div class="lb">勝抜</div><div class="slot f">千本松</div>${[2,3,4,5,6].map(k => `<div class="slot">${k}</div>`).join("")}</div></div>
+  <div class="grid">${P.map((p,i) => card(v,p,i)).join("")}</div></div>`; };
+let cur = "S1";
+const mx = document.getElementById("mx");
+mx.innerHTML = Object.keys(V).map(k => `<button class="th" data-k="${k}">${scr(k)}<span>${V[k].name}</span></button>`).join("");
+function show(){
+  document.getElementById("big").innerHTML = scr(cur);
+  document.getElementById("cap").innerHTML = `<b>${V[cur].name}</b>${V[cur].desc}`;
+  mx.querySelectorAll(".th").forEach(b => b.setAttribute("aria-pressed", b.dataset.k===cur));
+}
+mx.addEventListener("click", e => { const b = e.target.closest(".th"); if (!b) return; cur = b.dataset.k; show(); window.scrollTo({top:0, behavior:"smooth"}); });
+show();
+}
+</script>
