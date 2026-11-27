@@ -44,7 +44,7 @@
 - [x] ルールエンジン: 3R-B 7by7 — rules-engine-dev
 - [x] ルールエンジン: 3R-C Initial7 — rules-engine-dev
 - [x] ルールエンジン: ExR phase1 / phase2 — rules-engine-dev
-- [ ] ルールエンジン: SF タイムレース — rules-engine-dev
+- [x] ルールエンジン: SF タイムレース — rules-engine-dev
 - [ ] ルールエンジン: F 10○2休 — rules-engine-dev
 - [ ] ルールエンジン: サドンデス・Undo — rules-engine-dev
 - [ ] 操作画面: 参加者管理・CSV読込 — control-dev
