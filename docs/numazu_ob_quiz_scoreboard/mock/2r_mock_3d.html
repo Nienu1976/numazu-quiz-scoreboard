@@ -686,12 +686,23 @@ body{
   function start() {
     applyLiteMode(liteMode);
     renderAll();
-    // フォントロード後にCanvasテクスチャを強制再描画
-    if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(() => {
-        rigs.forEach(rig => { rig.lastFrontKey = ''; rig.lastTagKey = ''; });
-        rigs.forEach((_, i) => syncRigTexture(i, true, true));
+    // フォントロード後にCanvasテクスチャを強制再描画（表・黒板・裏面すべて）
+    // unicode-range 分割のため、実際に描く文字を指定して読み込みを待つ
+    const refreshAll = () => {
+      rigs.forEach((rig, i) => {
+        rig.lastFrontKey = ''; rig.lastTagKey = '';
+        HT.drawCardBack(rig.backCanvas, S.p[i]);
+        rig.backTex.needsUpdate = true;
+        syncRigTexture(i, true, true);
       });
+    };
+    if (document.fonts && document.fonts.load) {
+      const txt = PEOPLE.map(q => q[0]).join('') + '失格抜け勝ち○×第期リーチ連答権正解+0123456789';
+      Promise.all([
+        document.fonts.load('900 40px "Big Shoulders Stencil Display"', '0123456789'),
+        document.fonts.load('400 40px "Dela Gothic One"', txt),
+        document.fonts.load('700 40px "BIZ UDPGothic"', txt)
+      ]).catch(() => {}).then(() => document.fonts.ready).then(refreshAll);
     }
     lastTime = performance.now();
     rafId = requestAnimationFrame(tick);

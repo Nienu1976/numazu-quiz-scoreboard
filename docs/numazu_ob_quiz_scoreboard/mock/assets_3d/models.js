@@ -189,7 +189,7 @@
 
     // 連答権・回転灯マスト（札の上部右側）
     const mastGroup = new THREE.Group();
-    mastGroup.position.set(0.58, 1.14, 0.02);
+    mastGroup.position.set(0.58, 1.14, 0.22); // 手前に出して上段札に隠れないように
     motionGroup.add(mastGroup);
 
     const pole = new THREE.Mesh(shared.mastPoleGeo, shared.darkMetalMat);
@@ -247,7 +247,8 @@
 
     // 失格時の波型海面（普段は下に隠れてスケールY=0.001）
     const seaMesh = new THREE.Mesh(shared.seaGeo, shared.seaMat);
-    seaMesh.position.set(0, -1.22, 0.16);
+    // 札の沈み後の下端(-1.32)より下まで覆い、錆色のはみ出しを防ぐ
+    seaMesh.position.set(0, -1.42, 0.16);
     seaMesh.scale.set(1, 0.001, 1);
     seaMesh.visible = false;
     root.add(seaMesh);
