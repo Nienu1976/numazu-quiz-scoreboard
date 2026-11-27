@@ -37,7 +37,7 @@
 - [ ] データモデル・画面間通信設計 — rules-architect
 
 ## 2. 実装
-- [ ] プロジェクト雛形・GitHub Pages デプロイ — control-dev
+- [~] プロジェクト雛形（Vite+TS済み・control.html/display.html）・GitHub Pages デプロイは未 — control-dev
 - [x] ルールエンジン: 1R 採点・順位・プレート — rules-engine-dev
 - [x] ルールエンジン: 2R 連答つき5○2× — rules-engine-dev
 - [x] ルールエンジン: 3R-A 7up-down — rules-engine-dev
@@ -47,10 +47,10 @@
 - [x] ルールエンジン: SF タイムレース — rules-engine-dev
 - [x] ルールエンジン: F 10○2休 — rules-engine-dev
 - [x] ルールエンジン: サドンデス・Undo — rules-engine-dev
-- [ ] 操作画面: 参加者管理・CSV読込 — control-dev
-- [ ] 操作画面: ペーパー得点入力 — control-dev
-- [ ] 操作画面: 早押し入力（3行レイアウト） — control-dev
-- [ ] 操作画面: 組分け・コース選択・席順 — control-dev
+- [x] 操作画面: 参加者管理・CSV読込 — control-dev
+- [x] 操作画面: ペーパー得点入力（1Rのみ。ExR1は未） — control-dev
+- [~] 操作画面: 早押し入力（3行レイアウト）2R実装済み。3R以降は未 — control-dev
+- [~] 操作画面: 組分け（2R蛇腹・席入替）済み。コース選択・SF組分けは未 — control-dev
 - [ ] 表示画面: 自動投影（Window Management API） — display-dev
 - [ ] 表示画面: ラウンド別表示・演出 — display-dev
 - [ ] PWA化（オフライン起動） — display-dev
@@ -68,3 +68,10 @@
 - [ ] GAS 設定手順書 — ops-writer
 - [ ] トラブル対応表（投影されない・PC再起動時の復旧等） — ops-writer
 - [ ] 本番機でのリハーサル — 統括
+
+## 補足: 操作画面（control-dev, 2026-11-27）
+- 構成: `control.html` → `src/control/`（store=状態とイベント保存、payload=表示画面への送信データ、csv、main=UI）。`display.html` は受信確認だけの空の受け口。
+- 保存: localStorage `numazu-quiz-control-v1` に参加者＋イベント列。状態は毎回 `replay` で再計算。
+- 送信: BroadcastChannel `numazu-quiz-display`（`src/shared/protocol.ts`）。本名・ふりがな・連絡先は型に無く送れない（テストあり）。1R順位は確定後のみ送る。
+- 判断: 1R確定後は参加者追加・削除・欠席変更を不可／確定取消は組分け前のみ／開始済みの組は席入替不可／無効操作（勝抜者への○など）はイベントに記録しない。
+- 未対応: 1R同点の手動並べ替えUI（エンジンは対応済み）、3R以降・ExR・SF・F、SDの対象者選択（エンジン規約どおり自動）、CSV書き出し。
