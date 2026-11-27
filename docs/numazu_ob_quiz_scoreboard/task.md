@@ -40,7 +40,7 @@
 - [ ] プロジェクト雛形・GitHub Pages デプロイ — control-dev
 - [x] ルールエンジン: 1R 採点・順位・プレート — rules-engine-dev
 - [x] ルールエンジン: 2R 連答つき5○2× — rules-engine-dev
-- [ ] ルールエンジン: 3R-A 7up-down — rules-engine-dev
+- [x] ルールエンジン: 3R-A 7up-down — rules-engine-dev
 - [ ] ルールエンジン: 3R-B 7by7 — rules-engine-dev
 - [ ] ルールエンジン: 3R-C Initial7 — rules-engine-dev
 - [ ] ルールエンジン: ExR phase1 / phase2 — rules-engine-dev
