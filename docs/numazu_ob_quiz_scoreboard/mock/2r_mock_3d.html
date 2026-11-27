@@ -368,6 +368,7 @@ body{
   }
 
   function renderAll() {
+    clearAutoTimers();
     if (G) {
       G.killTweensOf(flash);
       G.killTweensOf(scene.position);
@@ -456,14 +457,14 @@ body{
       .to(rig.motionGroup.position, { z: 0, duration: 0.45, ease: 'elastic.out(1.2, 0.35)' }, '<');
   }
 
-  function winShow3D(i) {
+  function winShow3D(i, final = S.done) {
     const p = S.p[i];
     const rig = rigs[i];
 
     if (!G || liteMode) {
       syncRigTexture(i, true, true);
       syncMastState(i);
-      if (S.done) endShow();
+      if (final) endShow();
       return;
     }
 
@@ -492,7 +493,7 @@ body{
       .add(() => {
         flash.style.visibility = 'hidden';
         G.set(flash, { clearProps: 'all' });
-        if (S.done) endShow();
+        if (final) endShow();
       });
   }
 
@@ -518,6 +519,39 @@ body{
       .to(rig.flipGroup.rotation, { y: Math.PI, duration: 0.72, ease: 'power2.inOut' })
       .to(rig.seaMesh.scale, { y: 1, duration: 0.95, ease: 'power1.inOut' }, '-=0.2')
       .to(rig.motionGroup.position, { y: -0.18, duration: 0.95, ease: 'power1.inOut' }, '<');
+  }
+
+  /* ---- 残り全員の自動勝ち抜け（rules_spec §3.2 暫定N2） ---- */
+  let autoTimers = [];
+  function clearAutoTimers() { autoTimers.forEach(clearTimeout); autoTimers = []; }
+
+  function autoFinish() {
+    if (S.done) return;
+    const play = S.p.map((p, i) => i).filter(i => S.p[i].st === 'play');
+    const remain = SEATS - S.winners.length;
+    if (!play.length || play.length > remain) return;
+    // 抜け順: ○多い → ×少ない → 席番号（モックでは1R順位の代わり）
+    play.sort((a, b) => (S.p[b].o - S.p[a].o) || (S.p[a].x - S.p[b].x) || (a - b));
+    play.forEach(i => {
+      const p = S.p[i];
+      p.st = 'win';
+      S.winners.push(i);
+      p.rank = S.winners.length;
+    });
+    S.holder = null;
+    S.done = S.winners.length >= SEATS || !S.p.some(p => p.st === 'play');
+    S.last += `／在席${play.length}人が残り枠以下 → 自動勝ち抜け`;
+    renderCtl();
+    const step = (G && !liteMode) ? 1900 : 500;
+    const first = (G && !liteMode) ? 1500 : 300;
+    play.forEach((i, k) => {
+      autoTimers.push(setTimeout(() => {
+        syncRigTexture(i, true, false);
+        winShow3D(i, k === play.length - 1);
+      }, first + k * step));
+    });
+    // 連答権の回転灯など他札の状態は即時反映
+    rigs.forEach((_, j) => syncMastState(j));
   }
 
   /* ---- ゲームルール処理 ---- */
@@ -587,6 +621,7 @@ body{
       }
       if (p.st === 'out') sinkCard3D(i);
     }
+    autoFinish();
   }
 
   /* ---- 軽量モード・視点切替 ---- */
