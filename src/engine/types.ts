@@ -12,6 +12,7 @@ export type Event =
   | { type: 'selectEnvelope'; envelopeId: string }
   | { type: 'setScore'; playerId: string; score: number }
   | { type: 'chooseCourse'; playerId: string; course: string }
+  | { type: 'setTieOrder'; playerIds: string[] } // 1R同点ブロックの手動並べ替え
   | { type: 'abort' } // 打ち切り / SFの判定確定
   | { type: 'sdStart' }
   | { type: 'finalize' };
