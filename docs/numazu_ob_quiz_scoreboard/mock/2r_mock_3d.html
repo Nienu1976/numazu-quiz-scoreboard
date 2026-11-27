@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2R 連答つき5○2× 3Dスコアボード（沼東OB例会）</title>
+<link rel="stylesheet" href="./assets_3d/fonts/dela-gothic-one.css">
+<link rel="stylesheet" href="./assets_3d/fonts/big-shoulders-700.css">
+<link rel="stylesheet" href="./assets_3d/fonts/big-shoulders-900.css">
+<link rel="stylesheet" href="./assets_3d/fonts/biz-udpgothic-700.css">
+<style>
+:root{
+  color-scheme:dark;
+  --ai:#0e2240;--sea:#0a1a33;--kinari:#e9dfc6;--kinari2:#d8ccad;--shiro:#f6f3ec;
+  --aka:#c8102e;--sabi:#8c3f1e;--koku:#1f2b26;--chalk:#eef0e6;--sig:#3ee08f;--ink:#141414;
+  --p-r:#c8102e;--p-b:#2058b8;--p-y:#f0b400;--p-g:#1d8a4b;
+}
+*{box-sizing:border-box;min-width:0}
+html,body{height:100%;margin:0}
+body{
+  background:var(--sea);color:var(--shiro);
+  font:15px/1.4 "BIZ UDPGothic",sans-serif;
+  display:flex;flex-direction:column;overflow:hidden;
+}
+.wrap{
+  flex:none;display:grid;place-items:center;
+  padding:12px max(16px,env(safe-area-inset-left,0px)) 8px max(16px,env(safe-area-inset-right,0px));
+}
+.stage{
+  position:relative;container-type:inline-size;
+  width:min(100%,calc(70dvh * 16/9));aspect-ratio:16/9;
+  background:var(--ai);overflow:hidden;border:2px solid #000;
+}
+.stage *{line-height:1}
+#glCanvas{
+  position:absolute;inset:0;width:100%;height:100%;display:block;
+}
+/* 見出し＋ルール（2D HUD） */
+.hd{
+  position:absolute;left:2cqw;right:2cqw;top:1.6cqw;height:7cqw;
+  display:flex;gap:1.6cqw;z-index:4;pointer-events:none;
+}
+.no{
+  background:var(--shiro);color:var(--ink);border:.5cqw solid var(--aka);
+  width:7cqw;display:grid;place-items:center;
+  font:900 5cqw "Big Shoulders Stencil Display",Impact,sans-serif;
+}
+.tt{display:flex;flex-direction:column;justify-content:center;gap:.9cqw}
+.tt h1{margin:0;font:400 2.7cqw "Dela Gothic One",sans-serif;letter-spacing:-.02em}
+.tt p{margin:0;font:400 1.5cqw "Dela Gothic One",sans-serif;color:var(--kinari2)}
+.rules{margin-left:auto;display:flex;gap:.5cqw}
+.rule{
+  background:var(--shiro);color:var(--ink);border:.2cqw solid #000;
+  padding:0 1cqw;display:flex;flex-direction:column;justify-content:center;gap:.6cqw;
+}
+.rule b{font:900 3cqw "Big Shoulders Stencil Display",Impact,sans-serif}
+.rule span{font:700 1.1cqw "BIZ UDPGothic",sans-serif;white-space:nowrap}
+.rule.ren{background:var(--koku);color:var(--chalk)}
+.rule.ren b{color:var(--sig)}
+.rule.left{background:var(--aka);color:var(--shiro)}
+
+/* 勝ち抜け・組終了フラッシュ帯 */
+.flash{
+  position:absolute;left:0;right:0;top:40%;height:11cqw;
+  background:var(--aka);color:var(--shiro);
+  display:flex;align-items:center;justify-content:center;gap:2.4cqw;
+  font:400 4.6cqw "Dela Gothic One",sans-serif;
+  border-block:.6cqw solid var(--shiro);z-index:10;visibility:hidden;
+  pointer-events:none;
+}
+.flash small{font:900 3.6cqw "Big Shoulders Stencil Display",Impact,sans-serif}
+
+/* 操作ストリップ */
+.ctl{
+  flex:1;min-height:0;background:var(--kinari);color:var(--ink);
+  border-top:4px solid var(--aka);display:flex;gap:12px;
+  padding:10px max(16px,env(safe-area-inset-right,0px)) max(10px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
+}
+.strip{flex:1;overflow-x:auto}
+.cols{
+  display:grid;grid-template-columns:repeat(12,minmax(64px,1fr));gap:4px;
+  min-width:820px;height:100%;grid-template-rows:auto 1fr 1fr;
+}
+.who{
+  background:var(--shiro);border:2px solid var(--ink);padding:5px 6px 6px;
+  display:flex;flex-direction:column;gap:3px;
+}
+.who .t{display:flex;justify-content:space-between;align-items:center;gap:4px}
+.who .sn{font:900 19px "Big Shoulders Stencil Display",Impact,sans-serif;color:#fff;padding:0 5px}
+.who.r .sn{background:var(--p-r)}.who.b .sn{background:var(--p-b)}
+.who.y .sn{background:var(--p-y);color:#000}.who.g .sn{background:var(--p-g)}
+.who .st{font-size:13px;white-space:nowrap}
+.who .n{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.who .rk{font-size:12px;background:var(--sig);color:#062814;padding:1px 4px;align-self:flex-start}
+.who.done{opacity:.5}
+.cols button{
+  color:#fff;font:700 28px "BIZ UDPGothic",sans-serif;
+  border:2px solid var(--ink);cursor:pointer;min-height:40px;
+}
+.bo{background:var(--aka)}
+.bx{background:var(--ai)}
+.cols button:hover:not(:disabled){outline:3px solid var(--p-y);outline-offset:-5px}
+.cols button:active:not(:disabled){translate:0 2px}
+.cols button:disabled{
+  background:var(--kinari2);color:#8d8371;border-color:#a89c80;
+  cursor:not-allowed;font-size:13px;
+}
+:where(button):focus-visible{
+  outline:3px solid #141414;outline-offset:2px;
+}
+.side{width:220px;flex:none;display:flex;flex-direction:column;gap:5px}
+.side button{
+  color:var(--ink);font:700 15px "BIZ UDPGothic",sans-serif;
+  border:2px solid var(--ink);cursor:pointer;padding:6px 8px;
+}
+.undo{background:var(--p-y);font-size:19px!important;flex:1}
+.thru{background:var(--shiro)}
+.util-row{display:flex;gap:4px}
+.util-row button{flex:1;font-size:12px!important;padding:5px 4px!important;background:var(--shiro)}
+.util-row button[aria-pressed="true"]{background:var(--koku);color:var(--sig);border-color:var(--ink)}
+.rst{background:transparent;font-size:12px!important;padding:4px!important}
+.last{
+  font-size:12px;background:var(--koku);color:var(--chalk);
+  padding:5px 8px;min-height:2.5em;display:flex;align-items:center;
+}
+@media(max-width:760px){.side{width:140px}.undo{font-size:15px!important}}
+</style>
+</head>
+<body>
+
+<main class="wrap">
+  <div class="stage" id="stage" aria-label="2R 得点表示ステージ（3D）">
+    <canvas id="glCanvas"></canvas>
+    <div class="hd">
+      <div class="no">2R</div>
+      <div class="tt"><h1>第2ラウンド　連答つき 5○2×</h1><p>第1組</p></div>
+      <div class="rules">
+        <div class="rule"><b>5○</b><span>勝ち抜け</span></div>
+        <div class="rule"><b>2×</b><span>失格</span></div>
+        <div class="rule ren"><b>2○</b><span>連答権中の正解</span></div>
+        <div class="rule left"><b id="left">6</b><span>勝ち抜け枠 残り</span></div>
+      </div>
+    </div>
+    <div class="flash" id="flash" role="status" aria-live="polite"></div>
+  </div>
+</main>
+
+<section class="ctl" aria-label="得点操作パネル">
+  <div class="strip"><div class="cols" id="cols"></div></div>
+  <div class="side">
+    <button class="undo" id="undo" type="button">1手戻す</button>
+    <button class="thru" id="thru" type="button">スルー</button>
+    <div class="util-row">
+      <button id="liteBtn" type="button" aria-pressed="false">軽量: OFF</button>
+      <button id="camBtn" type="button" aria-pressed="false">視点: 標準</button>
+    </div>
+    <div class="last" id="lastC" aria-live="polite">操作はまだありません</div>
+    <button class="rst" id="rst" type="button">最初から（ダミーに戻す）</button>
+  </div>
+</section>
+
+<script src="./assets_3d/three.min.js"></script>
+<script src="./assets_3d/gsap.min.js"></script>
+<script src="./assets_3d/textures.js"></script>
+<script src="./assets_3d/models.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  /* ---- 定数・初期データ（2r_mock.html と同一） ---- */
+  const G = window.gsap;
+  const HT = window.HarborTextures;
+  const HM = window.HarborModels;
+
+  const INIT = { r: 3, b: 2, y: 1, g: 0 };
+  const PEOPLE = [
+    ['しおかぜ', 48, 'g'], ['ぬまっこ', 52, 'b'], ['カツオ番長', 39, 'y'], ['ひもの', 55, 'g'],
+    ['千本松', 44, 'r'], ['香貫山', 50, 'g'], ['ゆりかもめ', 57, 'y'], ['アジフライ', 46, 'g'],
+    ['狩野川', 41, 'b'], ['深海魚', 53, 'g'], ['びゅうお', 49, 'y'], ['我入道', 58, 'g']
+  ];
+  const WIN = 5, LOSE = 2, SEATS = 6, GROUP = 1;
+
+  const fresh = () => ({
+    p: PEOPLE.map(([n, k, c]) => ({ n, k, c, o: INIT[c], x: 0, st: 'play', rank: 0 })),
+    holder: null,
+    winners: [],
+    last: '',
+    done: false
+  });
+
+  let S = fresh();
+  let H = [];
+  let liteMode = false;
+  let frontCam = false;
+  const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reducedMotion) liteMode = true;
+
+  const $ = id => document.getElementById(id);
+  const stage = $('stage');
+  const canvas = $('glCanvas');
+  const cols = $('cols');
+  const flash = $('flash');
+  const liteBtn = $('liteBtn');
+  const camBtn = $('camBtn');
+  const pad = i => String(i + 1).padStart(2, '0');
+
+  /* ---- Three.js シーン初期化 ---- */
+  const renderer = new THREE.WebGLRenderer({
+    canvas,
+    antialias: !liteMode,
+    powerPreference: 'high-performance'
+  });
+  renderer.setPixelRatio(liteMode ? 1 : Math.min(window.devicePixelRatio || 1, 2));
+  renderer.shadowMap.enabled = !liteMode;
+  renderer.shadowMap.type = THREE.BasicShadowMap; // くっきりした影
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0e2240);
+
+  // 16:9 ステージ用カメラ（わずかに見下ろす角度）
+  const camera = new THREE.PerspectiveCamera(28, 16 / 9, 0.1, 60);
+  const CAM_STD = { x: 0, y: 1.55, z: 14.3, lookY: -0.22 };
+  const CAM_FRONT = { x: 0, y: -0.22, z: 14.4, lookY: -0.22 };
+  camera.position.set(CAM_STD.x, CAM_STD.y, CAM_STD.z);
+  camera.lookAt(0, CAM_STD.lookY, 0);
+
+  // ライティング（トゥーン調を引き立てる明確な方向光＋環境光）
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.72);
+  scene.add(ambientLight);
+
+  const dirLight = new THREE.DirectionalLight(0xfff8ea, 1.05);
+  dirLight.position.set(4.5, 8.5, 9.5);
+  dirLight.castShadow = true;
+  dirLight.shadow.mapSize.set(1024, 1024);
+  dirLight.shadow.camera.near = 1;
+  dirLight.shadow.camera.far = 26;
+  dirLight.shadow.camera.left = -8;
+  dirLight.shadow.camera.right = 8;
+  dirLight.shadow.camera.top = 5;
+  dirLight.shadow.camera.bottom = -5;
+  scene.add(dirLight);
+
+  // 共有アセット＆ステージ＆12枚の札リグ生成
+  const maxAniso = renderer.capabilities.getMaxAnisotropy();
+  const shared = HM.createSharedAssets(Math.min(maxAniso, 4));
+  HM.createHarborStage(scene, shared.toonMap);
+
+  const rigs = S.p.map((p, i) => {
+    const rig = HM.createCardRig(shared, p, i, LOSE);
+    const col = i % 6;
+    const row = Math.floor(i / 6);
+    const x = (col - 2.5) * 2.08;
+    const y = row === 0 ? 0.92 : -1.96;
+    rig.root.position.set(x, y, 0);
+    scene.add(rig.root);
+    return rig;
+  });
+
+  function resizeRenderer() {
+    const w = stage.clientWidth;
+    const h = stage.clientHeight;
+    if (!w || !h) return;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+  }
+  const ro = new ResizeObserver(resizeRenderer);
+  ro.observe(stage);
+  resizeRenderer();
+
+  /* ---- 札テクスチャ・状態の同期 ---- */
+  function syncRigTexture(i, updateFront, updateTag) {
+    const p = S.p[i];
+    const rig = rigs[i];
+    const hasStreak = S.holder === i;
+    const isWin = p.st === 'win';
+
+    if (updateFront) {
+      const fKey = `${p.n}|${p.k}|${p.c}|${hasStreak}|${isWin}`;
+      if (rig.lastFrontKey !== fKey) {
+        HT.drawCardFront(rig.frontCanvas, p, i, hasStreak, isWin);
+        rig.frontTex.needsUpdate = true;
+        rig.lastFrontKey = fKey;
+      }
+    }
+    if (updateTag) {
+      const tKey = `${p.o}|${p.x}|${p.st}|${p.rank}`;
+      if (rig.lastTagKey !== tKey) {
+        HT.drawScoreTag(rig.tagCanvas, p, LOSE);
+        rig.tagTex.needsUpdate = true;
+        rig.lastTagKey = tKey;
+      }
+    }
+  }
+
+  function syncMastState(i) {
+    const p = S.p[i];
+    const rig = rigs[i];
+    const hasStreak = S.holder === i;
+    const isOutOrWin = p.st !== 'play';
+
+    rig.haloGroup.visible = hasStreak;
+    rig.mastGroup.visible = !isOutOrWin;
+
+    if (hasStreak) {
+      rig.domeMat.color.setHex(0xc9ffe0);
+      rig.domeMat.emissive.setHex(0x3ee08f);
+      rig.domeMat.emissiveIntensity = 1.4;
+      rig.beamsGroup.visible = !liteMode;
+    } else {
+      rig.domeMat.color.setHex(0x33425a);
+      rig.domeMat.emissive.setHex(0x000000);
+      rig.domeMat.emissiveIntensity = 0;
+      rig.beamsGroup.visible = false;
+      rig.rotator.rotation.y = 0;
+    }
+  }
+
+  function rcImmediate(i) {
+    const p = S.p[i];
+    const rig = rigs[i];
+    if (G) {
+      G.killTweensOf([rig.motionGroup.position, rig.flipGroup.rotation, rig.tagPivot.rotation, rig.seaMesh.scale, rig.popMesh.position, rig.popMesh.scale]);
+    }
+    rig.motionGroup.position.set(0, p.st === 'out' ? -0.18 : 0, 0);
+    rig.flipGroup.rotation.set(0, p.st === 'out' ? Math.PI : 0, 0);
+    rig.tagPivot.rotation.set(0, 0, 0);
+    rig.popMesh.visible = false;
+
+    if (p.st === 'out') {
+      rig.seaMesh.visible = true;
+      rig.seaMesh.scale.set(1, 1, 1);
+    } else {
+      rig.seaMesh.visible = false;
+      rig.seaMesh.scale.set(1, 0.001, 1);
+    }
+
+    syncRigTexture(i, true, true);
+    syncMastState(i);
+  }
+
+  /* ---- 操作UIレンダリング ---- */
+  function renderCtl() {
+    const lbl = p => p.st === 'win' ? `${p.rank}抜け` : p.st === 'out' ? '失格' : `${p.o}○ ${p.x}×`;
+    cols.innerHTML =
+      S.p.map((p, i) => `<div class="who ${p.c} ${p.st !== 'play' ? 'done' : ''}"><div class="t"><span class="sn">${pad(i)}</span><span class="st">${lbl(p)}</span></div><span class="n">${p.n}</span>${S.holder === i ? '<span class="rk">連答権</span>' : ''}</div>`).join('') +
+      S.p.map((p, i) => `<button class="bo" data-a="o" data-i="${i}" type="button" ${p.st !== 'play' || S.done ? 'disabled' : ''}>${p.st === 'win' ? '勝ち抜け' : p.st === 'out' ? '失格' : '○'}</button>`).join('') +
+      S.p.map((p, i) => `<button class="bx" data-a="x" data-i="${i}" type="button" ${p.st !== 'play' || S.done ? 'disabled' : ''}>${p.st === 'play' ? '×' : '—'}</button>`).join('');
+    $('left').textContent = SEATS - S.winners.length;
+    $('lastC').textContent = S.last ? `直前: ${S.last}` : '操作はまだありません';
+    $('undo').disabled = !H.length;
+  }
+
+  function renderAll() {
+    if (G) {
+      G.killTweensOf(flash);
+      G.killTweensOf(scene.position);
+      G.set(flash, { clearProps: 'all' });
+    }
+    scene.position.set(0, 0, 0);
+    rigs.forEach((_, i) => rcImmediate(i));
+    renderCtl();
+    flash.style.visibility = S.done ? 'visible' : 'hidden';
+    if (S.done) flash.textContent = `第${GROUP}組 終了`;
+  }
+
+  /* ---- 3D演出アニメーション ---- */
+  function flipScoreTag3D(i) {
+    const rig = rigs[i];
+    if (!G || liteMode) {
+      syncRigTexture(i, false, true);
+      return;
+    }
+    G.timeline()
+      .to(rig.tagPivot.rotation, {
+        x: Math.PI / 2,
+        duration: 0.13,
+        ease: 'power1.in',
+        onComplete: () => syncRigTexture(i, false, true)
+      })
+      .fromTo(
+        rig.tagPivot.rotation,
+        { x: -Math.PI / 2 },
+        { x: 0, duration: 0.44, ease: 'back.out(2.8)' }
+      );
+  }
+
+  function hopCard3D(i) {
+    if (!G || liteMode) return;
+    const rig = rigs[i];
+    G.timeline()
+      .to(rig.motionGroup.position, { y: 0.24, z: 0.22, duration: 0.14, ease: 'power2.out' })
+      .to(rig.motionGroup.position, { y: 0, z: 0, duration: 0.55, ease: 'bounce.out' });
+  }
+
+  function popBanner3D(i, text, isRen) {
+    const rig = rigs[i];
+    HT.drawPopup(rig.popCanvas, text, isRen);
+    rig.popTex.needsUpdate = true;
+    rig.popMesh.visible = true;
+
+    if (!G || liteMode) {
+      rig.popMesh.position.set(0, 1.38, 0.42);
+      rig.popMesh.scale.set(1, 1, 1);
+      setTimeout(() => { rig.popMesh.visible = false; }, isRen ? 900 : 500);
+      return;
+    }
+
+    const tl = G.timeline({ onComplete: () => { rig.popMesh.visible = false; } });
+    tl.fromTo(
+      rig.popMesh.position,
+      { y: 0.9, z: 0.25 },
+      { y: 1.48, z: 0.55, duration: isRen ? 0.34 : 0.24, ease: isRen ? 'back.out(2.8)' : 'power2.out' }
+    ).fromTo(
+      rig.popMesh.scale,
+      { x: isRen ? 1.7 : 0.7, y: isRen ? 1.7 : 0.7 },
+      { x: 1, y: 1, duration: isRen ? 0.34 : 0.24, ease: 'back.out(2.5)' },
+      '<'
+    ).to(
+      rig.popMesh.position,
+      { y: 1.95, duration: 0.42, ease: 'power1.in', delay: isRen ? 1.05 : 0.55 }
+    ).to(
+      rig.popMesh.scale,
+      { x: 0.01, y: 0.01, duration: 0.32, ease: 'power1.in' },
+      '<0.1'
+    );
+  }
+
+  function winShow3D(i) {
+    const p = S.p[i];
+    const rig = rigs[i];
+
+    if (!G || liteMode) {
+      syncRigTexture(i, true, true);
+      syncMastState(i);
+      if (S.done) endShow();
+      return;
+    }
+
+    G.timeline({ delay: 0.42 })
+      .to(rig.tagPivot.rotation, {
+        x: Math.PI / 2,
+        duration: 0.16,
+        ease: 'power1.in',
+        onComplete: () => {
+          syncRigTexture(i, true, true);
+          syncMastState(i);
+        }
+      })
+      .fromTo(
+        rig.tagPivot.rotation,
+        { x: -Math.PI / 2 },
+        { x: 0, duration: 0.5, ease: 'back.out(2.5)' }
+      )
+      .fromTo(scene.position, { x: -0.18 }, { x: 0, duration: 0.45, ease: 'elastic.out(1.2, 0.25)' }, '<')
+      .add(() => {
+        flash.innerHTML = `<small>${p.rank}抜け</small>${p.n}<small>${pad(i)}</small>`;
+        flash.style.visibility = 'visible';
+      }, '<')
+      .fromTo(flash, { xPercent: -100 }, { xPercent: 0, duration: 0.28, ease: 'power3.out' }, '<')
+      .to(flash, { xPercent: 100, duration: 0.3, ease: 'power3.in', delay: 0.9 })
+      .add(() => {
+        flash.style.visibility = 'hidden';
+        G.set(flash, { clearProps: 'all' });
+        if (S.done) endShow();
+      });
+  }
+
+  function endShow() {
+    flash.textContent = `第${GROUP}組 終了`;
+    flash.style.visibility = 'visible';
+    if (G && !liteMode) {
+      G.fromTo(flash, { scaleY: 0 }, { scaleY: 1, duration: 0.4, ease: 'back.out(2)' });
+    }
+  }
+
+  function sinkCard3D(i) {
+    const rig = rigs[i];
+    syncMastState(i);
+    rig.seaMesh.visible = true;
+
+    if (!G || liteMode) {
+      rcImmediate(i);
+      return;
+    }
+
+    G.timeline({ delay: 0.32 })
+      .to(rig.flipGroup.rotation, { y: Math.PI, duration: 0.72, ease: 'power2.inOut' })
+      .to(rig.seaMesh.scale, { y: 1, duration: 0.95, ease: 'power1.inOut' }, '-=0.2')
+      .to(rig.motionGroup.position, { y: -0.18, duration: 0.95, ease: 'power1.inOut' }, '<');
+  }
+
+  /* ---- ゲームルール処理 ---- */
+  function act(kind, i) {
+    if (S.done) return;
+    if (kind !== 'thru' && S.p[i].st !== 'play') return;
+    H.push(JSON.stringify(S));
+    const prev = S.holder;
+
+    if (kind === 'thru') {
+      S.last = 'スルー（連答権はそのまま）';
+      renderCtl();
+      return;
+    }
+
+    const p = S.p[i];
+    if (kind === 'o') {
+      const gain = prev === i ? 2 : 1;
+      p.o = Math.min(WIN, p.o + gain);
+      S.holder = gain === 2 ? null : i;
+      if (p.o >= WIN) {
+        p.st = 'win';
+        S.winners.push(i);
+        p.rank = S.winners.length;
+        S.holder = null;
+      }
+      if (S.winners.length >= SEATS) S.done = true;
+      S.last = `${pad(i)} ${p.n} ○ ${gain === 2 ? '連答 +2' : '+1'}${p.st === 'win' ? ` → ${p.rank}抜け` : S.holder === i ? '（連答権）' : ''}`;
+      renderCtl();
+
+      if (prev !== null && prev !== i) {
+        syncRigTexture(prev, true, false);
+        syncMastState(prev);
+      }
+
+      if (p.st === 'win') {
+        syncRigTexture(i, true, false);
+        syncMastState(i);
+        hopCard3D(i);
+        popBanner3D(i, gain === 2 ? '連答 +2' : '+1', gain === 2);
+        winShow3D(i);
+      } else {
+        syncRigTexture(i, true, false);
+        syncMastState(i);
+        flipScoreTag3D(i);
+        hopCard3D(i);
+        popBanner3D(i, gain === 2 ? '連答 +2' : '+1', gain === 2);
+      }
+    } else {
+      p.x++;
+      if (prev === i) S.holder = null;
+      if (p.x >= LOSE) p.st = 'out';
+      S.last = `${pad(i)} ${p.n} ×${p.st === 'out' ? ' → 失格' : ''}`;
+      renderCtl();
+
+      syncRigTexture(i, true, true);
+      if (prev === i) syncMastState(i);
+
+      if (G && !liteMode) {
+        G.fromTo(rigs[i].motionGroup.position, { x: -0.14 }, { x: 0, duration: 0.45, ease: 'elastic.out(1.4, 0.2)' });
+      }
+      if (p.st === 'out') sinkCard3D(i);
+    }
+  }
+
+  /* ---- 軽量モード・視点切替 ---- */
+  function applyLiteMode(on) {
+    liteMode = on;
+    liteBtn.setAttribute('aria-pressed', String(on));
+    liteBtn.textContent = on ? '軽量: ON' : '軽量: OFF';
+    renderer.setPixelRatio(on ? 1 : Math.min(window.devicePixelRatio || 1, 2));
+    renderer.shadowMap.enabled = !on;
+    dirLight.castShadow = !on;
+    rigs.forEach((_, i) => syncMastState(i));
+    resizeRenderer();
+  }
+
+  liteBtn.addEventListener('click', () => applyLiteMode(!liteMode));
+
+  camBtn.addEventListener('click', () => {
+    frontCam = !frontCam;
+    camBtn.setAttribute('aria-pressed', String(frontCam));
+    camBtn.textContent = frontCam ? '視点: 正面' : '視点: 標準';
+    const target = frontCam ? CAM_FRONT : CAM_STD;
+    if (G && !liteMode) {
+      G.to(camera.position, {
+        x: target.x, y: target.y, z: target.z,
+        duration: 0.45, ease: 'power2.out',
+        onUpdate: () => camera.lookAt(0, target.lookY, 0)
+      });
+    } else {
+      camera.position.set(target.x, target.y, target.z);
+      camera.lookAt(0, target.lookY, 0);
+    }
+  });
+
+  /* ---- UIイベント ---- */
+  cols.addEventListener('click', e => {
+    const b = e.target.closest('button');
+    if (b && !b.disabled) act(b.dataset.a, +b.dataset.i);
+  });
+  $('thru').onclick = () => act('thru');
+  $('undo').onclick = () => {
+    if (!H.length) return;
+    S = JSON.parse(H.pop());
+    renderAll();
+  };
+  $('rst').onclick = () => {
+    H = [];
+    S = fresh();
+    renderAll();
+  };
+
+  /* ---- メインレンダリングループ（非表示時は自動停止） ---- */
+  let rafId = null;
+  let lastTime = performance.now();
+
+  function tick(now) {
+    if (document.hidden) {
+      rafId = null;
+      return;
+    }
+    const dt = Math.min((now - lastTime) / 1000, 0.05);
+    lastTime = now;
+
+    // 連答権保持者の回転灯を連続回転＋穏やかな明滅（秒間3回未満で安全）
+    if (S.holder !== null) {
+      const rig = rigs[S.holder];
+      if (!reducedMotion) {
+        rig.rotator.rotation.y += dt * 5.2;
+      }
+      if (!liteMode) {
+        const pulse = 1.0 + 0.5 * Math.sin(now * 0.008);
+        rig.domeMat.emissiveIntensity = pulse;
+      }
+    }
+
+    renderer.render(scene, camera);
+    rafId = requestAnimationFrame(tick);
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && rafId === null) {
+      lastTime = performance.now();
+      rafId = requestAnimationFrame(tick);
+    }
+  });
+
+  /* ---- フォント読み込み完了を待ってから初期描画 ---- */
+  function start() {
+    applyLiteMode(liteMode);
+    renderAll();
+    // フォントロード後にCanvasテクスチャを強制再描画
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => {
+        rigs.forEach(rig => { rig.lastFrontKey = ''; rig.lastTagKey = ''; });
+        rigs.forEach((_, i) => syncRigTexture(i, true, true));
+      });
+    }
+    lastTime = performance.now();
+    rafId = requestAnimationFrame(tick);
+  }
+
+  start();
+})();
+</script>
+</body>
+</html>
