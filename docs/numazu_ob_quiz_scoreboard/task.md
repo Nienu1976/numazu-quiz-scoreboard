@@ -30,7 +30,7 @@
 - [ ] サドンデス・判定基準の共通仕様 — rules-architect
 - [ ] ExR phase1 ボーダー同点除外の仕様＋例 — rules-architect
 - [x] 2R表示モック v2（S2札・回転灯・自席勝ち抜け） — harbor-designer
-- [~] 2R表示の3D化 — 外部: Antigravity（作成済みとの報告あり・GitHub未着。受け取り待ち）
+- [x] 2R表示の3D化 試作（mock/2r_mock_3d.html, e75b3aa） — 外部: Antigravity
 - [ ] デザインシステム（色・書体・札コンポーネント） — harbor-designer
 - [ ] 表示画面ワイヤー（ラウンド別） — harbor-designer
 - [ ] 操作画面ワイヤー（名前/○/×の3行レイアウト） — harbor-designer

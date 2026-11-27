@@ -68,3 +68,10 @@
 | 運用マニュアル担当 | ops-writer | sonnet | session_01TQ36fzKNivbZb6pHscyhsH |
 
 タグ: `quiz-scoreboard` と `group:design` / `group:implementation` / `group:qa-ops`。親セッション＝統括（このセッション）。
+
+## 外部担当: 3D表示（Antigravity）
+
+- 3D表示の造形・改修は **Antigravity** が担当（ユーザー判断: クオリティ優先、2026-11-27）
+- 連携はリポジトリ経由のみ: Antigravity は作業後に必ず main へ commit & push する。push されていないものは未完了扱い
+- 統括は push された成果を取り込み、task.md を更新し、他担当（表示画面実装など）へ橋渡しする
+- 統括の環境ではWebGLの描画確認ができない（ソフトウェア描画が重すぎるため）。見た目の確認はユーザーの実機で行う
