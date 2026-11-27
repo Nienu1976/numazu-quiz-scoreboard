@@ -6,14 +6,17 @@ export type Phase = 'main' | 'needSD' | 'sd' | 'done';
 export type Plate = 'red' | 'blue' | 'yellow' | 'green';
 
 export type Event =
-  | { type: 'correct'; playerId: string; afterTimeUp?: boolean }
-  | { type: 'wrong'; playerId: string; afterTimeUp?: boolean }
+  | { type: 'correct'; playerId: string }
+  | { type: 'wrong'; playerId: string }
   | { type: 'through' }
   | { type: 'selectEnvelope'; envelopeId: string }
   | { type: 'setScore'; playerId: string; score: number }
   | { type: 'chooseCourse'; playerId: string; course: string }
   | { type: 'setTieOrder'; playerIds: string[] } // 1R同点ブロックの手動並べ替え
   | { type: 'abort' } // 打ち切り / SFの判定確定
+  | { type: 'timeUp' } // SF: タイムアップ（以降は押し込み分1回のみ）
+  | { type: 'withdraw'; playerId: string } // 途中棄権（N9暫定: 失格扱い）
+  | { type: 'setConfig'; config: Partial<EngineConfig> } // 設定値の変更（以降の計算にのみ効く）
   | { type: 'sdStart' }
   | { type: 'finalize' };
 
@@ -75,7 +78,8 @@ export interface RoundState {
   envelopes: Envelope[];
   currentEnvelope: string | null;
   questionWrongBy: string[];
-  lateAnswerUsed: boolean; // SF
+  timeUp: boolean; // SF
+  lateAnswerUsed: boolean; // SF 押し込み分を使ったか
 }
 
 export interface EngineConfig {

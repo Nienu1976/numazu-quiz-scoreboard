@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { init, ok, ng, th, abort, sdStart, fin, replay, seat, checkUndoRoundTrip } from './helpers';
-import { undo } from '../events';
+import { undo, dispatch } from '../events';
 import { replayScore, init1R, rank1R, initExR1, exr1Result } from '../scoreRound';
 import { replayTimer, remainingMs, isTimeUp } from '../timer';
 import { mergeConfig } from '../config';
@@ -9,7 +9,7 @@ import type { Event } from '../types';
 /**
  * qa-reviewer 追加テスト（review_engine.md 参照）。
  * - it(...)       : 仕様どおり動くことを確認した境界条件
- * - it.fails(...) : レビューで見つけた不具合。期待する振る舞いを書いてあり、現状は失敗する。
+ * - it(...) : レビューで見つけた不具合。期待する振る舞いを書いてあり、現状は失敗する。
  *                   修正されると「it.fails が通ってしまった」で落ちるので、そのとき it に戻すこと。
  */
 
@@ -35,7 +35,7 @@ describe('2R 連答権 追加境界', () => {
     const evs = [ok('A'), ok('B')];
     expect(replay(init('2R', ids), undo(evs)).holder).toBe('A');
   });
-  it.fails('R-03: SD の○で勝ち抜けた人に連答権が残らない', () => {
+  it('R-03: SD の○で勝ち抜けた人に連答権が残らない', () => {
     // A,B が 1○ で並び枠1 → 打ち切り → SD。B は本戦最後の○で連答権を持ったまま SD に入る
     const s = replay(init('2R', ['A', 'B', 'C'], { seatsToWin: 1 }), [ok('A'), ok('B'), abort, sdStart, ok('B')]);
     expect(s.phase).toBe('done');
@@ -144,10 +144,9 @@ describe('SF 追加境界', () => {
     const s = replay(j, [ng('A'), abort, sdStart]);
     expect(s.sd!.players).toEqual(['B', 'C', 'D', 'E', 'F', 'G']);
   });
-  it.fails('R-04: タイムアップ後の押し込みを使ったあとは、フラグなしの○×も受け付けない', () => {
-    // UI が afterTimeUp を付け忘れると、時間切れ後も無制限に入力できてしまう
-    const late: Event = { type: 'correct', playerId: 'A', afterTimeUp: true };
-    const s = replay(j, [late, ok('B')]);
+  it('R-04: タイムアップ後の押し込みを使ったあとは、フラグなしの○×も受け付けない', () => {
+    const s = replay(j, [{ type: 'timeUp' }, ok('A'), ok('B')]);
+    expect(seat(s, 'A').score).toBe(1);
     expect(seat(s, 'B').score).toBe(0);
   });
   it('タイマー: 一時停止→再開で残り時間が正しい', () => {
@@ -160,7 +159,7 @@ describe('SF 追加境界', () => {
 
 describe('1R / ExR1 追加境界', () => {
   const es = ['A', 'B', 'C', 'D'].map((id, i) => ({ playerId: id, entryNo: i + 1 }));
-  it.fails('R-05: 点数修正で別の同点ブロックへ移った人に、古い手動並べ替えが残らない', () => {
+  it('R-05: 点数修正で別の同点ブロックへ移った人に、古い手動並べ替えが残らない', () => {
     // A,D が 50点同点 → 手動で D を上に → D の点数を 40 に修正（B,C,D が 40点で同点）
     // 期待: 40点ブロックは受付番号順 B(2), C(3), D(4)。現状は D に古い手動順 0 が残り先頭に来る
     const s = replayScore(init1R(es), [
@@ -186,11 +185,12 @@ describe('1R / ExR1 追加境界', () => {
 });
 
 describe('Undo の運用契約', () => {
-  it.fails('R-01: 無視された finalize が末尾にあっても Undo が効く', () => {
+  it('R-01: 無視された finalize が末尾にあっても Undo が効く', () => {
     // UI が確定ボタンを未 done で押し、イベントを積んでしまった場合
     const j = init('3R-A', ['A', 'B', 'C'], { seatsToWin: 1 });
-    const evs = [ok('A'), fin];
-    expect(replay(j, evs).finalized).toBe(false);
-    expect(replay(j, undo(evs)).seats[0].score).toBe(0); // 「1手戻す」で A の○が消えること
+    // 無視されるイベントはログに積まれない（dispatch）ので、Undo は直前の有効な操作を戻す
+    const evs = dispatch(j, dispatch(j, [], ok('A')), fin);
+    expect(evs).toEqual([ok('A')]);
+    expect(replay(j, undo(evs)).seats[0].score).toBe(0);
   });
 });

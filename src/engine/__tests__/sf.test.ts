@@ -5,7 +5,8 @@ import type { Event } from '../types';
 
 const ids = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
 const i = init('SF', ids);
-const late = (id: string, correct = true): Event => ({ type: correct ? 'correct' : 'wrong', playerId: id, afterTimeUp: true });
+const tu: Event = { type: 'timeUp' };
+const late = (id: string, correct = true): Event => (correct ? ok(id) : ng(id)); // timeUp の後に置く
 const rep = (n: number, e: Event) => Array.from({ length: n }, () => e);
 
 describe('SF 得点・判定', () => {
@@ -46,19 +47,24 @@ describe('SF 得点・判定', () => {
 
 describe('SF 時間切れ §9.3', () => {
   it('タイムアップ後の押し込み分は1回だけ有効（N7）', () => {
-    const s = replay(i, [ok('B'), late('A'), late('C')]);
+    const s = replay(i, [ok('B'), tu, late('A'), late('C')]);
     expect(seat(s, 'A').score).toBe(1);
     expect(seat(s, 'C').score).toBe(0); // 2回目は無効
+  });
+  it('タイムアップ後は押し込み分以外の入力を受け付けない（R-04）', () => {
+    const s = replay(i, [tu, ok('A'), ok('B'), ng('C')]);
+    expect([seat(s, 'A').score, seat(s, 'B').score, seat(s, 'C').score]).toEqual([1, 0, 0]);
+    expect(replay(i, [tu]).timeUp).toBe(true);
   });
   it('時間切れ前の通常入力は何回でも', () => {
     expect(seat(replay(i, rep(5, ok('A'))), 'A').score).toBe(5);
   });
   it('設定で押し込み分を無効にできる', () => {
     const j = init('SF', ids, { config: { sfLateAnswer: false } });
-    expect(seat(replay(j, [late('A')]), 'A').score).toBe(0);
+    expect(seat(replay(j, [tu, late('A')]), 'A').score).toBe(0);
   });
   it('例: 7:02に正解 → ○入力後に判定確定', () => {
-    const s = replay(i, [ok('B'), late('A'), abort]);
+    const s = replay(i, [ok('B'), tu, late('A'), abort]);
     expect(s.phase).toBe('done');
     expect(s.finalRanking!.slice(0, 2)).toEqual(['A', 'B']);
   });

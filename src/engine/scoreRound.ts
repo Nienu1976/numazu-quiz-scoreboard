@@ -27,7 +27,11 @@ export function applyScore(s: ScoreRoundState, ev: Event): ScoreRoundState {
     const e = s.init.entries.find((x) => x.playerId === ev.playerId);
     if (!e || e.absent) return s;
     if (!Number.isInteger(ev.score) || ev.score < 0 || ev.score > s.init.maxScore) return s;
-    return { ...s, scores: { ...s.scores, [ev.playerId]: ev.score } };
+    if (s.scores[ev.playerId] === ev.score) return s;
+    // 点数が変わったら古い手動並べ替えは破棄 (R-05)
+    const tieOrder = { ...s.tieOrder };
+    delete tieOrder[ev.playerId];
+    return { ...s, scores: { ...s.scores, [ev.playerId]: ev.score }, tieOrder };
   }
   if (ev.type === 'setTieOrder') {
     const tieOrder = { ...s.tieOrder };
@@ -48,6 +52,8 @@ export interface Ranked {
   plates: Record<string, Plate | null>;
   /** 同点がプレート境界(5/6, 15/16, 30/31位)をまたぐ位置（その順位の人）。確定前警告用 */
   boundaryTies: number[];
+  /** 同点ブロック一覧（2人以上）。確定前警告用 (R-11) */
+  tieBlocks: string[][];
 }
 
 /** 点数降順。同点は手動並べ替え → 受付番号小さい順 (A14)。全順序（重複なし） */
@@ -63,7 +69,12 @@ export function rank1R(s: ScoreRoundState): Ranked {
   sorted.forEach((e, i) => { ranks[e.playerId] = i + 1; plates[e.playerId] = plateOf(i + 1); });
   const boundaryTies = [5, 15, 30].filter((r) =>
     sorted[r] && sorted[r - 1] && s.scores[sorted[r].playerId] === s.scores[sorted[r - 1].playerId]);
-  return { order: sorted.map((e) => e.playerId), ranks, plates, boundaryTies };
+  const tieBlocks: string[][] = [];
+  sorted.forEach((e, i) => {
+    if (i > 0 && s.scores[e.playerId] === s.scores[sorted[i - 1].playerId]) tieBlocks[tieBlocks.length - 1].push(e.playerId);
+    else if (sorted[i + 1] && s.scores[sorted[i + 1].playerId] === s.scores[e.playerId]) tieBlocks.push([e.playerId]);
+  });
+  return { order: sorted.map((e) => e.playerId), ranks, plates, boundaryTies, tieBlocks };
 }
 
 /** ExR phase1 進出判定（ボーダー同点は全員進出不可）§8.1 */

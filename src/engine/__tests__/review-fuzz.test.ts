@@ -33,12 +33,13 @@ function randomEvent(r: () => number, s: RoundState): Event {
   const ids = s.seats.map((x) => x.playerId);
   const pick = () => ids[Math.floor(r() * ids.length)];
   const x = r();
-  if (x < 0.45) return { type: 'correct', playerId: pick(), afterTimeUp: s.kind === 'SF' && r() < 0.05 };
+  if (x < 0.45) return { type: 'correct', playerId: pick() };
   if (x < 0.75) return { type: 'wrong', playerId: pick() };
   if (x < 0.85) return { type: 'through' };
   if (x < 0.88) return { type: 'abort' };
   if (x < 0.93) return { type: 'sdStart' };
   if (x < 0.96) return { type: 'selectEnvelope', envelopeId: `e${Math.floor(r() * 40)}` };
+  if (x < 0.98) return { type: 'timeUp' };
   return { type: 'finalize' };
 }
 
@@ -100,6 +101,11 @@ describe('R-T1 ファズ: 不変条件・Undo/replay 一貫性', () => {
             // 末尾から Undo を繰り返すと、各時点の状態に正確に戻る（finalize の手前まで）
             let l = log;
             for (let h = history.length - 2; h >= 0; h--) {
+              if (l[l.length - 1].type === 'timeUp') { // timeUp は Undo 対象外: ログからだけ外して照合
+                l = l.slice(0, -1);
+                expect(JSON.stringify(replay(i, l))).toBe(JSON.stringify(history[h]));
+                continue;
+              }
               const u = undo(l);
               if (u === l) { expect(l[l.length - 1].type).toBe('finalize'); break; }
               l = u;

@@ -55,7 +55,7 @@ export function createRound(init: RoundInit): RoundState {
     finalRanking: null, finalized: false, lastAction: '',
     holder: config.r2InitialHolder && init.kind === '2R'
       ? seats.filter((x) => x.o > 0).sort((a, b) => a.r1Rank - b.r1Rank)[0]?.playerId ?? null : null,
-    correctHistory: [], currentEnvelope: null, questionWrongBy: [], lateAnswerUsed: false,
+    correctHistory: [], currentEnvelope: null, questionWrongBy: [], timeUp: false, lateAnswerUsed: false,
     envelopes: (init.envelopes ?? []).map((e): Envelope => ({ ...e, used: false })),
   };
   settle(s); // §3.3 開始時点の欠員・自動勝ち抜け
@@ -168,11 +168,33 @@ function step(s: RoundState, ev: Event): boolean {
     if (ev.type !== 'sdStart' || !s.sdPending) return false;
     s.sd = sdStart(s.sdPending.players, s.sdPending.slots, s.config);
     s.phase = 'sd';
+    s.holder = null;
     s.lastAction = 'サドンデス開始';
     return true;
   }
   if (s.phase === 'sd') return stepSd(s, ev);
-  if (ev.type === 'abort') { doAbort(s); s.lastAction = '打ち切り'; return true; }
+  if (ev.type === 'abort') { doAbort(s); s.lastAction = s.kind === 'SF' ? '判定確定' : '打ち切り'; return true; }
+  if (ev.type === 'timeUp') {
+    if (s.kind !== 'SF' || s.timeUp) return false;
+    s.timeUp = true;
+    s.lastAction = 'タイムアップ';
+    return true;
+  }
+  if (ev.type === 'withdraw') {
+    const p = seatOf(s, ev.playerId);
+    if (!p || p.status !== 'play') return false;
+    p.status = 'out';
+    p.outOrder = s.seats.filter((x) => x.status === 'out').length;
+    if (s.holder === p.playerId) s.holder = null;
+    s.lastAction = `${p.playerId} 棄権`;
+    settle(s);
+    return true;
+  }
+  if (ev.type === 'setConfig') {
+    s.config = { ...s.config, ...ev.config };
+    s.lastAction = '設定変更';
+    return true;
+  }
   if (ev.type === 'selectEnvelope') return stepEnvelope(s, ev.envelopeId);
   if (ev.type === 'through') {
     if (s.kind === '2R' && s.config.r2ThroughClears) s.holder = null;
@@ -194,9 +216,7 @@ function stepSd(s: RoundState, ev: Event): boolean {
   s.lastAction = `SD: ${ev.type}`;
   if (next.finished) {
     for (const id of next.winners) {
-      const p = seatOf(s, id)!;
-      p.status = 'win';
-      p.winOrder = winCount(s);
+      markWin(s, seatOf(s, id)!);
     }
     finish(s);
   }
@@ -216,7 +236,9 @@ function stepEnvelope(s: RoundState, id: string): boolean {
 function stepAnswer(s: RoundState, ev: Extract<Event, { type: 'correct' | 'wrong' }>): boolean {
   const p = seatOf(s, ev.playerId);
   if (!p || !canAnswer(s, ev.playerId)) return false;
-  if (s.kind === 'SF' && ev.afterTimeUp) {
+  if (s.questionWrongBy.includes(ev.playerId)) return false; // 同じ問題で誤答した人は再解答できない (R-06)
+  if (s.kind === 'SF' && s.timeUp) {
+    // タイムアップ後は押し込み分の1回だけ有効 (N7)
     if (!s.config.sfLateAnswer || s.lateAnswerUsed) return false;
     s.lateAnswerUsed = true;
   }

@@ -1,7 +1,7 @@
 // 操作画面の状態。保存するのは「参加者＋全イベント列」だけ。表示用の状態は毎回エンジンで再計算する。
 import {
   apply, createRound, init1R, replay, replayScore, rank1R, canFinalize, snakeGroups,
-  PLATE_INITIAL_O, undo, unfinalize,
+  PLATE_INITIAL_O, undo, unfinalize, dispatch, dispatchScore,
   type Event, type RoundInit, type RoundState, type ScoreRoundState,
 } from '../engine';
 import type { ParsedPlayer } from './csv';
@@ -66,8 +66,9 @@ export function r1State(d: AppData): ScoreRoundState {
   return replayScore(init, d.r1Events);
 }
 export function r1Dispatch(d: AppData, ev: Event): AppData {
-  if (ev.type === 'finalize' && !canFinalize(r1State(d))) return d;
-  return { ...d, r1Events: [...d.r1Events, ev] };
+  const init = init1R(d.players.map((p) => ({ playerId: p.id, entryNo: p.entryNo, absent: p.absent })));
+  const r1Events = dispatchScore(init, d.r1Events, ev); // 状態が変わるときだけ記録 (R-01)
+  return r1Events === d.r1Events ? d : { ...d, r1Events };
 }
 export const r1Undo = (d: AppData): AppData => ({ ...d, r1Events: undo(d.r1Events) });
 /** 確定取消は組分け前だけ（次ラウンドとの不整合防止 §1.2） */
@@ -116,10 +117,9 @@ export function r2State(d: AppData, gi: number): RoundState | null {
 export function r2Dispatch(d: AppData, gi: number, ev: Event): AppData {
   const init = r2Init(d, gi);
   if (!init) return d;
-  const cur = replay(init, d.r2Events[gi]);
-  if (apply(cur, ev) === cur) return d;
-  const r2Events = d.r2Events.map((e, i) => (i === gi ? [...e, ev] : e));
-  return { ...d, r2Events };
+  const next = dispatch(init, d.r2Events[gi] ?? [], ev); // 状態が変わるときだけ記録 (R-01)
+  if (next === d.r2Events[gi]) return d;
+  return { ...d, r2Events: d.r2Events.map((e, i) => (i === gi ? next : e)) };
 }
 export function r2Undo(d: AppData, gi: number): AppData {
   return { ...d, r2Events: d.r2Events.map((e, i) => (i === gi ? undo(e) : e)) };

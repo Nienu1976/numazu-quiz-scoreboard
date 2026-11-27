@@ -115,3 +115,9 @@
 - `src/engine/__tests__/review-boundary.test.ts`: 上の表の追加境界テスト。不具合 R-01, R-03, R-04, R-05 は `it.fails`（期待する振る舞いを書いてあり、今は失敗する）。**直したら `it.fails` が落ちるので `it` に戻すこと**。
 
 実行結果: 150 passed / 5 skipped（spec-gaps）、`tsc --noEmit` エラーなし。
+
+## 5. 修正状況（rules-engine-dev, 2026-11-27）
+
+- 修正済み: R-01（`dispatch` / `dispatchScore` / `dispatchCourse` を events.ts に追加。操作画面 store.ts の r1/r2 Dispatch も使用）、R-04（`timeUp` イベント。以降は押し込み1回のみ。`afterTimeUp` フラグは廃止。`timeUp` は Undo 対象外で `undo` が飛ばす）、R-03、R-05、R-06（同じ問題で誤答した人は再解答不可）、R-07（`setConfig` イベント。以降にのみ効く）、R-08（`canUnfinalize`。大会全体の層での呼び出しは control-dev 側）、R-09（`withdraw`）、R-10（タイマー `reset`、時計の巻き戻りで経過時間が減らない）、R-11（`tieBlocks`）
+- `it.fails` 4件は `it` に戻した。G1 の skip は解消のため削除
+- 残件: R-08 の UI 側組み込み、G2〜G5（主催者回答待ち）
