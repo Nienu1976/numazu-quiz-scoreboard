@@ -43,7 +43,7 @@
 - [x] ルールエンジン: 3R-A 7up-down — rules-engine-dev
 - [x] ルールエンジン: 3R-B 7by7 — rules-engine-dev
 - [x] ルールエンジン: 3R-C Initial7 — rules-engine-dev
-- [ ] ルールエンジン: ExR phase1 / phase2 — rules-engine-dev
+- [x] ルールエンジン: ExR phase1 / phase2 — rules-engine-dev
 - [ ] ルールエンジン: SF タイムレース — rules-engine-dev
 - [ ] ルールエンジン: F 10○2休 — rules-engine-dev
 - [ ] ルールエンジン: サドンデス・Undo — rules-engine-dev

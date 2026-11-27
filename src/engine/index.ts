@@ -6,3 +6,4 @@ export * from './scoreRound';
 export * from './round';
 export * from './events';
 export * from './courses';
+export * from './timer';
