@@ -5,3 +5,4 @@ export * from './sd';
 export * from './scoreRound';
 export * from './round';
 export * from './events';
+export * from './courses';
