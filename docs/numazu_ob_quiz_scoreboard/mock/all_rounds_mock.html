@@ -1,0 +1,247 @@
+<title>全ラウンド表示モック</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Big+Shoulders+Stencil+Display:wght@700;900&family=BIZ+UDPGothic:wght@700&display=swap" rel="stylesheet">
+<style>
+/* VOICE occasion（会場で観客が見る投影画面）
+   IDEA 2Rで決めた競り札（S2）の見た目を全ラウンドに展開。言葉と意味は各ラウンドのルールどおり、情報は足さない
+   PICTURE 16:9 の投影画面を1枚ずつ。上のタブで切替
+   COLOUR 藍の地、生成りの札、黒板、船体の赤。プレート色は帯のみ。緑の発光は2Rの連答権だけ
+   TYPE Dela Gothic One（札・看板）＋ Big Shoulders Stencil（数字）＋ BIZ UDPゴシック（補足）
+   LAYOUT 上にタブ、下に投影画面。画面内は「見出し＋ルール札」の帯と、ラウンド固有の本体 */
+:root{color-scheme:dark;--ai:#0e2240;--ai2:#16325a;--sea:#0a1a33;--kinari:#e9dfc6;--kinari2:#d8ccad;--shiro:#f6f3ec;--aka:#c8102e;--sabi:#8c3f1e;--koku:#1f2b26;--chalk:#eef0e6;--sig:#3ee08f;--ki:#f0b400;--ink:#141414;
+--p-r:#c8102e;--p-b:#2058b8;--p-y:#f0b400;--p-g:#1d8a4b}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0}
+body{background:var(--sea);color:var(--shiro);font:15px/1.5 "BIZ UDPGothic",sans-serif}
+.in{padding:14px max(3vw,16px,env(safe-area-inset-right,0px)) 28px max(3vw,16px,env(safe-area-inset-left,0px))}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:0 auto 12px;width:min(100%,calc(80vh*16/9))}
+.tabs button{font:700 14px "BIZ UDPGothic",sans-serif;background:var(--ai2);color:var(--shiro);border:2px solid #000;padding:7px 10px;cursor:pointer}
+.tabs button[aria-pressed=true]{background:var(--shiro);color:var(--ink)}
+.note{width:min(100%,calc(80vh*16/9));margin:10px auto 0;color:#9fb0c8;font-size:13px}
+.stage{position:relative;container-type:inline-size;width:min(100%,calc(80vh*16/9));margin:0 auto;aspect-ratio:16/9;background:var(--ai);overflow:hidden;border:2px solid #000}
+.stage *{line-height:1}
+/* 見出し＋ルール札 */
+.hd{position:absolute;left:2cqw;right:2cqw;top:1.6cqw;height:7cqw;display:flex;gap:1.6cqw}
+.no{background:var(--shiro);color:var(--ink);border:.5cqw solid var(--aka);min-width:7cqw;padding:0 .6cqw;display:grid;place-items:center;font:900 4.4cqw "Big Shoulders Stencil Display",Impact,sans-serif;white-space:nowrap}
+.tt{display:flex;flex-direction:column;justify-content:center;gap:.9cqw}
+.tt h1{margin:0;font:400 2.6cqw "Dela Gothic One",sans-serif;letter-spacing:-.02em;white-space:nowrap}
+.tt p{margin:0;font:400 1.5cqw "Dela Gothic One",sans-serif;color:var(--kinari2)}
+.rules{margin-left:auto;display:flex;gap:.5cqw}
+.rule{background:var(--shiro);color:var(--ink);border:.2cqw solid #000;padding:0 1cqw;display:flex;flex-direction:column;justify-content:center;gap:.6cqw}
+.rule b{font:900 3cqw "Big Shoulders Stencil Display",sans-serif;white-space:nowrap}
+.rule b em{font:400 1.7cqw "Dela Gothic One",sans-serif;font-style:normal}
+.rule span{font:700 1.1cqw "BIZ UDPGothic",sans-serif;white-space:nowrap}
+.rule.dk{background:var(--koku);color:var(--chalk)}
+.rule.rd{background:var(--aka);color:var(--shiro)}
+.body{position:absolute;left:2cqw;right:2cqw;top:11.4cqw;bottom:2cqw}
+/* 札（S2）: font-size を親で決め、中身は em */
+.card{position:relative;font-size:var(--fs,1cqw);height:100%}
+.face{position:absolute;inset:0;border:.22em solid #000;background:var(--kinari);color:var(--ink);display:flex;flex-direction:column}
+.band{height:3.4em;display:flex;align-items:center;justify-content:space-between;padding:0 .8em;color:var(--shiro);gap:.4em}
+.r .band{background:var(--p-r)}.b .band{background:var(--p-b)}.y .band{background:var(--p-y);color:var(--ink)}.g .band{background:var(--p-g)}
+.seat{font:900 2.7em "Big Shoulders Stencil Display",sans-serif}
+.chip{font:400 1.15em "Dela Gothic One",sans-serif;padding:.35em .45em;border:.15em solid #000;white-space:nowrap}
+.chip.sel{background:var(--ki);color:var(--ink)}
+.chip.top{background:var(--shiro);color:var(--aka)}
+.nm{font:400 2.2em "Dela Gothic One",sans-serif;padding:.5em .36em 0;white-space:nowrap;overflow:hidden;letter-spacing:-.02em}
+.ki{font:700 1.2em "BIZ UDPGothic",sans-serif;padding:.45em .67em 0;color:#5a5244}
+.tag{margin:auto .8em .8em;background:var(--koku);color:var(--chalk);min-height:7em;display:flex;align-items:center;justify-content:space-between;padding:0 .9em;gap:.6em}
+.num{font:900 6.2em "Big Shoulders Stencil Display",sans-serif;white-space:nowrap}
+.num small{font:400 .26em "Dela Gothic One",sans-serif;margin-left:.1em;color:#b9c2b2}
+.xs{display:flex;flex-direction:column;gap:.4em}
+.xs.h{flex-direction:row}
+.xs i{width:2.1em;height:2.1em;border:.2em solid #8a7e6e;display:grid;place-items:center;font:900 1.8em/1 "BIZ UDPGothic",sans-serif;font-style:normal;color:transparent}
+.xs i{font-size:1em}
+.xs i::after{content:"×";font-size:1.7em;line-height:1}
+.xs i.on{background:var(--sabi);border-color:var(--sabi);color:var(--kinari)}
+.sub{font:700 1.2em "BIZ UDPGothic",sans-serif;color:#b9c2b2;text-align:right;white-space:nowrap}
+.sub b{display:block;font:900 2.6em "Big Shoulders Stencil Display",sans-serif;color:var(--chalk);margin-top:.15em}
+.win .face{background:var(--shiro);outline:.35em solid var(--aka);outline-offset:.15em}
+.win .tag{background:var(--aka);color:var(--shiro)}
+.win .tag .sub,.win .tag .num small{color:#ffd9de}
+.out .face{background:var(--sabi);color:var(--kinari)}
+.out .ki{color:#e6c8b4}
+.out .tag{background:#5e2a14}
+.out{translate:0 .7em}
+.rest .face{background:var(--kinari2)}
+.rest .tag{background:#3b3f3a}
+.lead .face{outline:.35em solid var(--shiro);outline-offset:.15em}
+/* 共通: 札の並び */
+.cards{display:grid;height:100%;gap:2.4cqw 1.4cqw;grid-auto-rows:minmax(0,1fr)}
+/* 1R結果 */
+.r1{display:grid;grid-template-columns:1fr 1.15fr 1.15fr 1.15fr 1.15fr;gap:1cqw;height:100%}
+.col{display:flex;flex-direction:column;gap:.35cqw}
+.colh{height:3.2cqw;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 .8cqw;color:var(--shiro);font:400 1.5cqw "Dela Gothic One",sans-serif;border:.2cqw solid #000;margin-bottom:.3cqw}
+.colh span{font:700 1.05cqw "BIZ UDPGothic",sans-serif}
+.colh.r{background:var(--p-r)}.colh.b{background:var(--p-b)}.colh.y{background:var(--p-y);color:var(--ink)}.colh.g{background:var(--p-g)}
+.colh.blank{visibility:hidden}
+.row{flex:1;min-height:0;max-height:3.4cqw;background:var(--kinari);color:var(--ink);display:grid;grid-template-columns:3.2cqw minmax(0,1fr) auto;align-items:center;gap:.6cqw;padding:0 .7cqw;border:.15cqw solid #000}
+.row .rk{font:900 1.6cqw "Big Shoulders Stencil Display",sans-serif}
+.row .n{font:400 1.2cqw "Dela Gothic One",sans-serif;white-space:nowrap;overflow:hidden}
+.row .n small{font:700 .95cqw "BIZ UDPGothic",sans-serif;color:#5a5244;margin-left:.5cqw}
+.row .sc{font:900 1.6cqw "Big Shoulders Stencil Display",sans-serif}
+.r1 .big .row{max-height:none;grid-template-columns:4cqw minmax(0,1fr) auto}
+.r1 .big .row .rk{font-size:3cqw}.r1 .big .row .n{font-size:1.8cqw}.r1 .big .row .sc{font-size:2.6cqw}
+/* 3R コース選択 */
+.c3{display:grid;grid-template-columns:20cqw repeat(3,minmax(0,1fr));gap:1.4cqw;height:100%}
+.now{display:flex;flex-direction:column;gap:1cqw}
+.now .lbl{font:400 1.6cqw "Dela Gothic One",sans-serif;background:var(--ki);color:var(--ink);padding:.7cqw .9cqw;border:.2cqw solid #000}
+.queue{display:flex;flex-direction:column;gap:.35cqw;margin-top:.4cqw}
+.queue .lbl2{font:700 1.15cqw "BIZ UDPGothic",sans-serif;color:var(--kinari2);margin-bottom:.3cqw}
+.course{background:var(--koku);border:.2cqw solid #000;display:flex;flex-direction:column}
+.course h3{margin:0;background:var(--shiro);color:var(--ink);padding:1cqw;font:400 2cqw "Dela Gothic One",sans-serif;display:flex;flex-direction:column;gap:.6cqw}
+.course h3 small{font:700 1.1cqw "BIZ UDPGothic",sans-serif}
+.course .left{display:flex;align-items:baseline;gap:.5cqw;padding:.9cqw 1cqw;color:var(--chalk);font:700 1.2cqw "BIZ UDPGothic",sans-serif}
+.course .left b{font:900 3.4cqw "Big Shoulders Stencil Display",sans-serif}
+.course.full .left b{color:var(--aka)}
+.slots{display:grid;grid-template-columns:1fr 1fr;gap:.4cqw;padding:0 1cqw 1cqw;flex:1;grid-auto-rows:minmax(0,1fr)}
+.slot{border:.18cqw dashed #5d6e63;display:flex;align-items:center;gap:.5cqw;padding:0 .5cqw;color:#5d6e63;font:900 1.5cqw "Big Shoulders Stencil Display",sans-serif}
+.slot.f{border:.18cqw solid #000;background:var(--kinari);color:var(--ink);border-left:.6cqw solid var(--pc)}
+.slot.f span{font:400 1.2cqw "Dela Gothic One",sans-serif;white-space:nowrap;overflow:hidden}
+.slot.new{outline:.3cqw solid var(--ki)}
+.pr{--pc:var(--p-r)}.pb{--pc:var(--p-b)}.py{--pc:var(--p-y)}.pg{--pc:var(--p-g)}
+/* 3R-C 封筒 */
+.ic{display:grid;grid-template-rows:minmax(0,1fr) 16.4cqw;gap:2cqw;height:100%}
+.env{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:.6cqw}
+.e{background:var(--kinari);color:var(--ink);border:.18cqw solid #000;position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:.5cqw;clip-path:polygon(0 0,50% 22%,100% 0,100% 100%,0 100%)}
+.e::before{content:"";position:absolute;left:0;right:0;top:0;height:22%;border-bottom:.18cqw solid #8a7e6e}
+.e b{font:400 1.9cqw "Dela Gothic One",sans-serif;margin-top:1cqw}
+.e small{font:900 1.1cqw "Big Shoulders Stencil Display",sans-serif;color:#7a705e}
+.e.done{background:#5b6475;color:#aeb6c4}
+.e.done b{text-decoration:line-through}
+.e.done::after{content:"済";position:absolute;right:.4cqw;bottom:.4cqw;font:400 1.2cqw "Dela Gothic One",sans-serif;background:var(--aka);color:var(--shiro);padding:.2cqw .3cqw}
+.e.pick{background:var(--ki);outline:.35cqw solid var(--shiro);outline-offset:.15cqw}
+/* ExR p1 ボーダー */
+.ex{display:flex;flex-direction:column;gap:.5cqw;height:100%}
+.tier{display:grid;grid-template-columns:7cqw 9cqw minmax(0,1fr);align-items:center;gap:1cqw;background:var(--ai2);padding:.5cqw .8cqw;border:.18cqw solid #000}
+.tier .pt{font:900 3.2cqw "Big Shoulders Stencil Display",sans-serif}
+.tier .pt small{font:400 1.3cqw "Dela Gothic One",sans-serif;margin-left:.2cqw}
+.tier .res{font:400 1.4cqw "Dela Gothic One",sans-serif;white-space:nowrap}
+.tier .ns{display:flex;flex-wrap:wrap;gap:.4cqw}
+.tier .ns span{background:var(--kinari);color:var(--ink);font:400 1.15cqw "Dela Gothic One",sans-serif;padding:.45cqw .6cqw;border-left:.5cqw solid var(--pc)}
+.tier.go{background:var(--shiro);color:var(--ink)}
+.tier.go .res{color:var(--aka)}
+.tier.tie{background:var(--sabi);color:var(--kinari)}
+.tier.tie .ns span{background:#e6c8b4}
+.border{display:flex;align-items:center;gap:1cqw;font:400 1.4cqw "Dela Gothic One",sans-serif;color:var(--aka)}
+.border::before,.border::after{content:"";flex:1;border-top:.35cqw solid var(--aka)}
+.tier.low{opacity:.55;padding:.35cqw .8cqw}
+/* SF タイマー */
+.sf{display:grid;grid-template-rows:12cqw minmax(0,1fr);gap:2.4cqw;height:100%}
+.timer{display:flex;align-items:center;gap:2cqw;justify-content:center;background:var(--koku);border:.25cqw solid #000}
+.timer b{font:900 10cqw "Big Shoulders Stencil Display",sans-serif;color:var(--chalk);letter-spacing:.02em}
+.timer span{font:400 1.8cqw "Dela Gothic One",sans-serif;color:var(--kinari2)}
+.bar{width:28cqw;height:1.6cqw;border:.2cqw solid var(--chalk);position:relative}
+.bar i{position:absolute;left:0;top:0;bottom:0;background:var(--chalk)}
+/* F ゲージ */
+.pips{display:flex;gap:.35em}
+.pips i{width:1.5em;height:3.2em;border:.2em solid #6f7c72;display:block}
+.pips i.on{background:var(--chalk);border-color:var(--chalk)}
+.fm{margin:auto .8em 0;display:flex;flex-direction:column;gap:.7em}
+.fm span{font:700 1.1em "BIZ UDPGothic",sans-serif;color:#5a5244}
+.f .pips i{flex:1;width:auto;height:4em;border-color:#8a7e6e}
+.f .pips i.on{background:var(--koku);border-color:var(--koku)}
+.f .pips{gap:.3em}
+.f .tag{margin-top:1em}
+.restbox{font:400 1.1em "Dela Gothic One",sans-serif;background:var(--shiro);color:var(--ink);padding:.4em .5em;white-space:nowrap}
+.restbox b{font:900 1.3em "Big Shoulders Stencil Display",sans-serif;margin:0 .1em}
+</style>
+
+<div class="in">
+  <div class="tabs" id="tabs"></div>
+  <div class="stage" id="stage"></div>
+  <p class="note" id="note"></p>
+</div>
+
+<script>
+{
+const NAMES = "しおかぜ ぬまっこ カツオ番長 ひもの 千本松 香貫山 ゆりかもめ アジフライ 狩野川 深海魚 びゅうお 我入道 牛臥 静浦 大瀬崎 戸田 内浦 西浦 片浜 金岡 大岡 門池 愛鷹 はるか みなと うみねこ しらす 桜えび 干物王 サバ缶 タチウオ メヒカリ キンメ イカ釣り 灯台守 防波堤 水門 夕凪 朝凪 潮騒 富士見 帆柱 錨 舳先 船長 甲板 網元 御用邸 氷屋 箱屋 浜焼き 港町 黒潮 白波 若潮 鰺 鯖 鮪 鰹".split(" ");
+const PL = r => r<=5?"r":r<=15?"b":r<=30?"y":"g";
+const P = NAMES.slice(0,60).map((n,i) => ({n, rank:i+1, c:PL(i+1), k:38 + (i*7)%21, score:Math.max(31, 92 - Math.round(i*0.95 + (i%3)))}));
+const pad = n => String(n).padStart(2,"0");
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const head = (no, title, sub, rules) => `<div class="hd"><div class="no">${no}</div><div class="tt"><h1>${title}</h1><p>${sub}</p></div>
+  <div class="rules">${rules.map(([b,s,k]) => `<div class="rule ${k||""}"><b>${b}</b><span>${s}</span></div>`).join("")}</div></div>`;
+const xs = (n, on, h) => `<span class="xs ${h?"h":""}">${Array.from({length:n}, (_,k) => `<i class="${k<on?"on":""}"></i>`).join("")}</span>`;
+const pips = (n, on) => `<span class="pips">${Array.from({length:n}, (_,k) => `<i class="${k<on?"on":""}"></i>`).join("")}</span>`;
+const card = (p, seat, val, side, {st="", chip="", mid=""}={}) => `<div class="card ${p.c} ${st}"><div class="face">
+  <div class="band"><span class="seat">${pad(seat)}</span>${chip}</div>
+  <div class="nm">${esc(p.n)}</div><div class="ki">第${p.k}期</div>${mid}
+  <div class="tag">${val}${side||""}</div></div></div>`;
+const numO = (v, u="○") => `<span class="num">${v}<small>${u}</small></span>`;
+const pick = idx => idx.map(i => P[i]);
+
+const SCREENS = [
+ {id:"r1", tab:"1R 結果発表", note:"60人を順位順にプレート色の列で表示。2Rの初期アドバンテージ（赤3○/青2○/黄1○）を列見出しに出す。", html:() => {
+   const grp = [[0,5,"r","赤","1–5位","2R 3○から"],[5,15,"b","青","6–15位","2R 2○から"],[15,30,"y","黄","16–30位","2R 1○から"],[30,45,"g","緑","31–60位","2R 0○から"],[45,60,"g","",""]];
+   return head("1R","第1ラウンド　100問ペーパー","結果発表",[["60<em>人</em>","参加"],["100<em>問</em>","満点"]]) +
+   `<div class="body"><div class="r1">${grp.map(([a,b,c,lab,rg,adv]) => `<div class="col ${a===0?"big":""}">
+     <div class="colh ${c} ${lab?"":"blank"}">${lab}<span>${rg}　${adv}</span></div>
+     ${P.slice(a,b).map(p => `<div class="row"><span class="rk">${p.rank}</span><span class="n">${esc(p.n)}<small>${p.k}期</small></span><span class="sc">${p.score}</span></div>`).join("")}</div>`).join("")}</div></div>`; }},
+ {id:"c3", tab:"3R コース選択", note:"2R勝ち抜け30人が1R順位の高い順に選ぶ（暫定）。選択中の人を左に大きく、各コースの残り枠を数字で。", html:() => {
+   const C = [["7up-down","○+1 / ×で0 / 7点抜け",[0,6,11,14,20,27,33,41]],["7by7","正解P×誤答P",[2,4,9,16,18,23,29,36,44,52]],["Initial7","封筒の頭文字から選ぶ",[1,3,7,12,25]]];
+   const now = P[8];
+   return head("3R","第3ラウンド　コース選択","1R順位の高い順に選択",[["10<em>人</em>","各コース定員"],["30<em>人</em>","選択者"]]) +
+   `<div class="body"><div class="c3"><div class="now"><span class="lbl">選択中</span>
+     <div style="--fs:.82cqw;height:17cqw">${card(now,9,`<span class="sub">1R<b>9位</b></span>`,"",{st:"lead"})}</div>
+     <div class="queue"><span class="lbl2">このあと</span>${pick([10,13,15]).map(p => `<div class="slot f p${p.c}"><span>${p.rank}位 ${esc(p.n)}</span></div>`).join("")}</div></div>
+     ${C.map(([n,s,ids]) => `<div class="course ${ids.length>=10?"full":""}"><h3>${n}<small>${s}</small></h3>
+       <div class="left">残り<b>${10-ids.length}</b>枠${ids.length>=10?"　締切":""}</div>
+       <div class="slots">${Array.from({length:10}, (_,k) => { const p = P[ids[k]]; return p ? `<div class="slot f p${p.c}"><span>${esc(p.n)}</span></div>` : `<div class="slot">${k+1}</div>`; }).join("")}</div></div>`).join("")}
+   </div></div>`; }},
+ {id:"3a", tab:"3R-A 7up-down", note:"札は2Rと同じ。数字は現在の得点（×で0に戻る）。×は2つで失格。", html:() => {
+   const S = [[5,0],[2,1],[7,0,"win",1],[0,1],[3,0],[6,0],[0,2,"out"],[1,0],[4,1],[0,0]];
+   return head("3R-A","7up-down","第1コース",[["○<em>＋1</em>","正解"],["×<em>→0</em>","誤答で0に戻る"],["7<em>点</em>","勝ち抜け"],["2×","失格","dk"],["3<em>人</em>","勝ち抜け枠 残り","rd"]]) +
+   `<div class="body"><div class="cards" style="grid-template-columns:repeat(5,minmax(0,1fr));--fs:1.05cqw">${S.map(([o,x,st,rk],i) => card(P[[0,6,11,14,20,27,33,41,47,55][i]], i+1,
+     st==="win" ? `<span class="num">${rk}<small>抜け</small></span>` : numO(o,"点"), st==="win"?`<span class="sub">勝ち抜け</span>`:xs(2,x), {st})).join("")}</div></div>`; }},
+ {id:"3b", tab:"3R-B 7by7", note:"数字は得点＝正解P×誤答P。右に正解Pと誤答P。誤答Pが3になったら失格。", html:() => {
+   const S = [[3,7],[5,6],[2,5],[6,7],[1,4],[4,6],[2,3,"out"],[3,6],[0,7],[4,5]];
+   return head("3R-B","7by7","第2コース",[["正×誤","得点"],["○<em>正解P＋1</em>","初期 0"],["×<em>誤答P−1</em>","初期 7"],["3","誤答Pで失格","dk"]]) +
+   `<div class="body"><div class="cards" style="grid-template-columns:repeat(5,minmax(0,1fr));--fs:1.05cqw">${S.map(([a,b,st],i) => card(P[[2,4,9,16,18,23,29,36,44,52][i]], i+1,
+     numO(a*b,"点"), `<span class="sub">正×誤<b>${a}×${b}</b></span>`, {st})).join("")}</div></div>`; }},
+ {id:"3c", tab:"3R-C Initial7", note:"封筒（問題冒頭の文字）を全部掲示。済は暗く。次の選択者は札の帯に黄色の「選択者」。", html:() => {
+   const E = "ほ さ く な に て み ふ し か ゆ あ た つ ひ お せ き と ま こ う は え ろ や も す ち い".split(" ");
+   const done = new Set([1,4,7,12,15,20,23]);
+   const S = [[4,0],[2,1],[7,0,"win",1],[1,0],[3,2],[0,0],[5,1],[1,3,"out"],[2,0],[0,1]];
+   return head("3R-C","Initial7","第3コース",[["7○","勝ち抜け"],["3×","失格"],["<em>前問正解者</em>","次の封筒を選ぶ","dk"]]) +
+   `<div class="body"><div class="ic"><div class="env">${E.map((t,i) => `<div class="e ${done.has(i)?"done":""}"><b>${t}</b><small>${pad(i+1)}</small></div>`).join("")}</div>
+     <div class="cards" style="grid-template-columns:repeat(10,minmax(0,1fr));--fs:.62cqw">${S.map(([o,x,st,rk],i) => card(P[[1,3,7,12,25,30,35,40,46,58][i]], i+1,
+       st==="win" ? `<span class="num">${rk}<small>抜け</small></span>` : numO(o), st==="win"?"":xs(3,x), {st, chip:i===6?`<span class="chip sel">選択者</span>`:""})).join("")}</div></div></div>`; }},
+ {id:"ex1", tab:"ExR p1 結果", note:"得点の段で表示。上位12人までが進出。ボーダー上の同点者は全員進出不可（例: 8点の6人）。", html:() => {
+   const T = [[10,2],[9,7],[8,6],[7,9],[6,10],[5,8],[4,6]];
+   let k = 0, cum = 0;
+   const rows = T.map(([pt,n]) => { const ids = P.slice(12+k, 12+k+n); k += n; const go = cum + n <= 12; const tie = !go && cum < 12; cum += n; return {pt, ids, go, tie}; });
+   return head("ExR","敗者復活　脱落式筆記10問","第1部　結果",[["12<em>人</em>","上限"],["9<em>人</em>","進出","rd"]]) +
+   `<div class="body"><div class="ex">${rows.map(r => `${r.tie?`<div class="border">ボーダー　同点のため 8点の6人は進出できません</div>`:""}
+     <div class="tier ${r.go?"go":r.tie?"tie":"low"}"><span class="pt">${r.pt}<small>点</small></span><span class="res">${r.go?"進出":r.tie?"進出不可":""}</span>
+     <span class="ns">${(r.go||r.tie ? r.ids : r.ids.slice(0,8)).map(p => `<span class="p${p.c}">${esc(p.n)}</span>`).join("")}${!r.go&&!r.tie&&r.ids.length>8?`<span class="pg">ほか${r.ids.length-8}人</span>`:""}</span></div>`).join("")}</div></div>`; }},
+ {id:"sf", tab:"SF タイムレース", note:"残り時間を最大の要素に。得点は○+1/×−1。現在の上位2人に「上位」札。", html:() => {
+   const S = [[4],[6],[2],[-1],[5],[3],[1]];
+   const top = [1,4];
+   return head("SF","準決勝　7分間タイムレース","第1組",[["○<em>＋1</em>","正解"],["×<em>−1</em>","誤答"],["2<em>人</em>","終了時の上位が勝ち抜け","rd"]]) +
+   `<div class="body"><div class="sf"><div class="timer"><span>残り</span><b>4:32</b><span class="bar" style="display:block"><i style="width:65%"></i></span></div>
+     <div class="cards" style="grid-template-columns:repeat(7,minmax(0,1fr));--fs:.9cqw">${S.map(([o],i) => card(P[[0,3,5,8,10,13,17][i]], i+1, numO(o,"点"), "",
+       {st: top.includes(i)?"lead":"", chip: top.includes(i)?`<span class="chip top">上位</span>`:""})).join("")}</div></div></div>`; }},
+ {id:"f", tab:"F 10○2休", note:"4人の札を大きく。10マスで優勝までの距離。休み中は札を灰色にして「休み あと◯問」。", html:() => {
+   const S = [[7,""],[4,"rest",2],[8,""],[5,"rest",1]];
+   return head("F","決勝　10○2休","",[["10○","優勝"],["×<em>2問休み</em>","誤答"]]) +
+   `<div class="body f"><div class="cards" style="grid-template-columns:repeat(4,minmax(0,1fr));--fs:1.5cqw">${S.map(([o,st,r],i) => card(P[[0,2,1,6][i]], i+1,
+     numO(o), st==="rest" ? `<span class="restbox">休み あと<b>${r}</b>問</span>` : "", {st, mid:`<div class="fm">${pips(10,o)}<span>優勝まで あと${10-o}○</span></div>`})).join("")}</div></div>`; }},
+ {id:"sd", tab:"サドンデス", note:"対象者だけを大きく。問題数の上限（参加人数+1）があるので残り問題数を出す。決着しない場合は1R順位で決定。", html:() => {
+   return head("SD","サドンデス","2Rの1組　残り1枠",[["1○","勝ち抜け"],["1×","失格"],["3<em>問</em>","残り（上限4問）","rd"],["<em>1R順位</em>","決着しなければ","dk"]]) +
+   `<div class="body"><div class="cards" style="grid-template-columns:repeat(3,minmax(0,1fr));--fs:1.7cqw;padding:0 6cqw">${[[22,""],[31,"out"],[40,""]].map(([pi,st],i) => card(P[pi], i+1,
+     `<span class="sub">1R<b>${P[pi].rank}位</b></span>`, st==="out"?`<span class="sub">失格</span>`:xs(1,0), {st})).join("")}</div></div>`; }},
+];
+const tabs = document.getElementById("tabs"), stage = document.getElementById("stage"), note = document.getElementById("note");
+tabs.innerHTML = SCREENS.map(s => `<button data-id="${s.id}">${s.tab}</button>`).join("");
+function show(id){
+  const s = SCREENS.find(x => x.id===id) || SCREENS[0];
+  stage.innerHTML = s.html(); note.textContent = s.note;
+  tabs.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", b.dataset.id===s.id));
+}
+tabs.addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; history.replaceState(null, "", "#"+b.dataset.id); show(b.dataset.id); });
+window.addEventListener("hashchange", () => show(location.hash.slice(1)));
+show(location.hash.slice(1));
+}
+</script>
