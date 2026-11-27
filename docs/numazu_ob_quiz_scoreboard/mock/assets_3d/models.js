@@ -37,7 +37,7 @@
 
     // 失格時の波型海面プレート
     const seaShape = new THREE.Shape();
-    const sw = 1.92;
+    const sw = 1.84;
     const sh = 0.68;
     const teeth = 8;
     seaShape.moveTo(-sw / 2, 0);
@@ -63,7 +63,7 @@
     const tagSideMat = new THREE.MeshToonMaterial({ color: 0x111815, gradientMap: toonMap });
     const blackLineMat = new THREE.LineBasicMaterial({ color: 0x000000 });
     const darkMetalMat = new THREE.MeshToonMaterial({ color: 0x18202c, gradientMap: toonMap });
-    const seaMat = new THREE.MeshBasicMaterial({ color: 0x0a1a33 });
+    const seaMat = new THREE.MeshBasicMaterial({ color: 0x2a6fb0 });
 
     return {
       maxAnisotropy,
@@ -248,7 +248,7 @@
     // 失格時の波型海面（普段は下に隠れてスケールY=0.001）
     const seaMesh = new THREE.Mesh(shared.seaGeo, shared.seaMat);
     // 札の沈み後の下端(-1.32)より下まで覆い、錆色のはみ出しを防ぐ
-    seaMesh.position.set(0, -1.42, 0.16);
+    seaMesh.position.set(0, -1.35, 0.16);
     seaMesh.scale.set(1, 0.001, 1);
     seaMesh.visible = false;
     root.add(seaMesh);
