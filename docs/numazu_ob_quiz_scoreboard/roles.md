@@ -56,13 +56,15 @@
 各役割は Claude アプリのサイドバーに独立セッションとして作成した（タイトル形式「役割：クイズ大会スコアボード」）。
 初回はリポジトリ未作成のため全員「待機」指示。リポジトリ作成後、統括から作業指示を送る。
 
-| セッション名 | 対応エージェント定義 |
-|---|---|
-| ルール設計担当 | rules-architect |
-| デザイン担当 | harbor-designer |
-| ルールエンジン実装担当 | rules-engine-dev |
-| 表示画面実装担当 | display-dev |
-| 操作画面実装担当 | control-dev |
-| エントリー実装担当 | entry-dev |
-| 検証担当 | qa-reviewer |
-| 運用マニュアル担当 | ops-writer |
+| セッション名 | 対応エージェント定義 | モデル | セッションID |
+|---|---|---|---|
+| ルール設計担当 | rules-architect | opus | session_01TQ36fvSnbjCTcS7ZBSDYb9 |
+| デザイン担当 | harbor-designer | opus | session_01TQ36fzm4oXqHq5MzAowdP6 |
+| ルールエンジン実装担当 | rules-engine-dev | sonnet | session_01TQ36fyxTsvdXbaQ276XnSh |
+| 表示画面実装担当 | display-dev | sonnet | session_01TQ36fwZ5A4WSwdPo3ge3eZ |
+| 操作画面実装担当 | control-dev | sonnet | session_01TQ36fvbmbr2pNmtwA5Abq5 |
+| エントリー実装担当 | entry-dev | sonnet | session_01TQ36fv8p7sRWkxUTqsgQzs |
+| 検証担当 | qa-reviewer | opus | session_01TQ36fzA29kYLJ3Dx8eNAkN |
+| 運用マニュアル担当 | ops-writer | sonnet | session_01TQ36fxw13fp3iKeHt2R4Fo |
+
+タグ: `quiz-scoreboard` と `group:design` / `group:implementation` / `group:qa-ops`。親セッション＝統括（このセッション）。
