@@ -14,3 +14,8 @@
 - 1R ターンオーバー: [mock/r1_turnover_mock.html](https://nienu1976.github.io/numazu-quiz-scoreboard/docs/numazu_ob_quiz_scoreboard/mock/r1_turnover_mock.html)
 
 ※ `github.com/.../blob/...` のリンクはコード表示なので、画面を見るときは上の Pages のURLを使う。
+
+## 本番画面（試用版）
+- 操作画面: https://nienu1976.github.io/numazu-quiz-scoreboard/app/control.html
+- 表示画面: https://nienu1976.github.io/numazu-quiz-scoreboard/app/display.html
+- `app/` は `npx vite build --outDir app --emptyOutDir` の出力。ソース変更後は再ビルドしてコミットする
