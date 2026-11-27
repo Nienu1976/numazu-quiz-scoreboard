@@ -26,9 +26,9 @@
 - [~] 主催者への確認依頼（organizer_questions.pdf 作成済み・回答待ち）
 
 ## 1. 設計
-- [ ] ルール仕様書（ラウンド別の状態・操作・判定・勝抜/失格条件） — rules-architect
-- [ ] サドンデス・判定基準の共通仕様 — rules-architect
-- [ ] ExR phase1 ボーダー同点除外の仕様＋例 — rules-architect
+- [x] ルール仕様書（ラウンド別の状態・操作・判定・勝抜/失格条件） — rules-architect（rules_spec.md）
+- [x] サドンデス・判定基準の共通仕様 — rules-architect（rules_spec.md §3-4）
+- [x] ExR phase1 ボーダー同点除外の仕様＋例 — rules-architect（rules_spec.md §8.1）
 - [x] 2R表示モック v2（S2札・回転灯・自席勝ち抜け） — harbor-designer
 - [x] 2R表示の3D化 試作（mock/2r_mock_3d.html, e75b3aa） — 外部: Antigravity
 - [ ] デザインシステム（色・書体・札コンポーネント） — harbor-designer
