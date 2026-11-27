@@ -31,7 +31,8 @@
 - [x] ExR phase1 ボーダー同点除外の仕様＋例 — rules-architect（rules_spec.md §8.1）
 - [x] 2R表示モック v2（S2札・回転灯・自席勝ち抜け） — harbor-designer
 - [x] 2R表示の3D化 試作（mock/2r_mock_3d.html, e75b3aa） — 外部: Antigravity
-- [x] 2R 3D 修正1回目（明るさ・上段ランプ・レイアウト拡大・リーチ演出, 6db34f0） — 外部: Antigravity（ユーザー確認待ち）
+- [x] 2R 3D 修正1回目（明るさ・上段ランプ・レイアウト拡大・リーチ演出, 6db34f0） — 外部: Antigravity
+- [x] 2R 3D 修正2回目（失格フォント統一・沈む演出の明確化・下段ランプ・飛び残り自動勝ち抜け） — display-dev（ユーザー確認済み 2026-11-27）
 - [ ] デザインシステム（色・書体・札コンポーネント） — harbor-designer
 - [ ] 表示画面ワイヤー（ラウンド別） — harbor-designer
 - [ ] 操作画面ワイヤー（名前/○/×の3行レイアウト） — harbor-designer
