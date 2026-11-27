@@ -154,7 +154,6 @@ body{
     <button class="thru" id="thru" type="button">スルー</button>
     <div class="util-row">
       <button id="liteBtn" type="button" aria-pressed="false">軽量: OFF</button>
-      <button id="camBtn" type="button" aria-pressed="false">視点: 標準</button>
     </div>
     <div class="last" id="lastC" aria-live="polite">操作はまだありません</div>
     <button class="rst" id="rst" type="button">最初から（ダミーに戻す）</button>
@@ -193,7 +192,6 @@ body{
   let S = fresh();
   let H = [];
   let liteMode = false;
-  let frontCam = false;
   const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reducedMotion) liteMode = true;
 
@@ -203,7 +201,6 @@ body{
   const cols = $('cols');
   const flash = $('flash');
   const liteBtn = $('liteBtn');
-  const camBtn = $('camBtn');
   const pad = i => String(i + 1).padStart(2, '0');
   const isReach = i => {
     const p = S.p[i];
@@ -226,10 +223,9 @@ body{
 
   // 16:9 ステージ用カメラ（上段ランプが隠れず、下段まで大きく使う）
   const camera = new THREE.PerspectiveCamera(28, 16 / 9, 0.1, 60);
-  const CAM_STD = { x: 0, y: 1.35, z: 14.0, lookY: 0.14 };
-  const CAM_FRONT = { x: 0, y: 0.14, z: 14.1, lookY: 0.14 };
-  camera.position.set(CAM_STD.x, CAM_STD.y, CAM_STD.z);
-  camera.lookAt(0, CAM_STD.lookY, 0);
+  // 視点は正面固定（決定事項: 傾き視点は廃止）
+  camera.position.set(0, 0.14, 14.1);
+  camera.lookAt(0, 0.14, 0);
 
   // ライティング（プロジェクターでも札の面がくっきり明るく見える設定）
   const ambientLight = new THREE.AmbientLight(0xffffff, 1.05);
@@ -637,23 +633,6 @@ body{
   }
 
   liteBtn.addEventListener('click', () => applyLiteMode(!liteMode));
-
-  camBtn.addEventListener('click', () => {
-    frontCam = !frontCam;
-    camBtn.setAttribute('aria-pressed', String(frontCam));
-    camBtn.textContent = frontCam ? '視点: 正面' : '視点: 標準';
-    const target = frontCam ? CAM_FRONT : CAM_STD;
-    if (G && !liteMode) {
-      G.to(camera.position, {
-        x: target.x, y: target.y, z: target.z,
-        duration: 0.45, ease: 'power2.out',
-        onUpdate: () => camera.lookAt(0, target.lookY, 0)
-      });
-    } else {
-      camera.position.set(target.x, target.y, target.z);
-      camera.lookAt(0, target.lookY, 0);
-    }
-  });
 
   /* ---- UIイベント ---- */
   cols.addEventListener('click', e => {
