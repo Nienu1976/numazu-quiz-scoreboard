@@ -18,6 +18,7 @@
 - [x] 企画書の読み込み・ルール整理
 - [x] 運用環境・入力方式・デザイン軸の決定
 - [x] requirements.md 作成
+- [x] GitHub リポジトリ作成（Nienu1976/numazu-quiz-scoreboard, Public）・初回push
 - [ ] 未決事項の解消（requirements.md §4）
 - [ ] 技術スタック決定
 - [ ] 主催者への暫定事項の確認依頼（2R/SF組分け、3R選択順、3R定員）
