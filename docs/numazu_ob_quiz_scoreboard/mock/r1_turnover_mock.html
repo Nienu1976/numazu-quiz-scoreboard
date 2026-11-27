@@ -1,0 +1,208 @@
+<title>1R ターンオーバー発表</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Big+Shoulders+Stencil+Display:wght@700;900&family=BIZ+UDPGothic:wght@700&display=swap" rel="stylesheet">
+<style>
+/* VOICE occasion（会場で観客が見る結果発表）
+   IDEA 2Rと同じ競り札（S2）を伏せて並べ、裏返すと名前が出るターンオーバー発表。上位から、まとまりごとに1クリックずつ
+   PICTURE 16:9 の投影画面。伏せ札はプレート色に順位だけ、表は S2 札（名前が主役）
+   COLOUR 藍の地、生成りの札、プレート色（赤/青/黄/緑）、船体の赤、白の閃光はフラット
+   TYPE Dela Gothic One（札・看板）＋ Big Shoulders Stencil（順位・点数）＋ BIZ UDPゴシック（操作）
+   LAYOUT 上に投影画面、下に「次へ」「1つ戻る」と進行表 */
+:root{color-scheme:dark;--ai:#0e2240;--sea:#0a1a33;--kinari:#e9dfc6;--kinari2:#d8ccad;--shiro:#f6f3ec;--aka:#c8102e;--koku:#1f2b26;--chalk:#eef0e6;--ink:#141414;
+--p-r:#c8102e;--p-b:#2058b8;--p-y:#f0b400;--p-g:#1d8a4b}
+*{box-sizing:border-box;min-width:0}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0}
+body{background:var(--sea);color:var(--shiro);font:15px/1.4 "BIZ UDPGothic",sans-serif;display:flex;flex-direction:column;overflow:hidden}
+.wrap{flex:none;display:grid;place-items:center;padding:12px max(16px,env(safe-area-inset-left,0px)) 8px max(16px,env(safe-area-inset-right,0px))}
+.stage{position:relative;container-type:inline-size;width:min(100%,calc(74dvh*16/9));aspect-ratio:16/9;background:var(--ai);overflow:hidden;border:2px solid #000}
+.stage *{line-height:1}
+.hd{position:absolute;left:2cqw;right:2cqw;top:1.6cqw;height:7cqw;display:flex;gap:1.6cqw;z-index:3}
+.no{background:var(--shiro);color:var(--ink);border:.5cqw solid var(--aka);width:7cqw;display:grid;place-items:center;font:900 5cqw "Big Shoulders Stencil Display",Impact,sans-serif}
+.tt{display:flex;flex-direction:column;justify-content:center;gap:.9cqw}
+.tt h1{margin:0;font:400 2.7cqw "Dela Gothic One",sans-serif;letter-spacing:-.02em}
+.tt p{margin:0;font:400 1.5cqw "Dela Gothic One",sans-serif;color:var(--kinari2)}
+.now{margin-left:auto;align-self:center;font:400 1.6cqw "Dela Gothic One",sans-serif;background:var(--shiro);color:var(--ink);padding:1cqw 1.2cqw;border:.2cqw solid #000;white-space:nowrap}
+.now b{font:900 2.4cqw "Big Shoulders Stencil Display",sans-serif;margin:0 .2cqw}
+.body{position:absolute;left:2cqw;right:2cqw;top:11.6cqw;bottom:2cqw;display:grid;gap:1.4cqw;perspective:120cqw}
+/* 札 */
+.card{position:relative;font-size:var(--fs,1cqw);transform-style:preserve-3d}
+.in3{position:absolute;inset:0;transform-style:preserve-3d}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border:.22em solid #000}
+.down{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.6em;color:var(--shiro)}
+.r .down{background:var(--p-r)}.b .down{background:var(--p-b)}.y .down{background:var(--p-y);color:var(--ink)}.g .down{background:var(--p-g)}
+.down b{font:900 7em "Big Shoulders Stencil Display",sans-serif}
+.down b small{font:400 .3em "Dela Gothic One",sans-serif;margin-left:.1em}
+.down span{font:400 1.3em "Dela Gothic One",sans-serif;opacity:.85;letter-spacing:.2em}
+.up{transform:rotateY(180deg);background:var(--kinari);color:var(--ink);display:flex;flex-direction:column}
+.band{height:3.4em;display:flex;align-items:center;justify-content:space-between;padding:0 .8em;color:var(--shiro)}
+.r .band{background:var(--p-r)}.b .band{background:var(--p-b)}.y .band{background:var(--p-y);color:var(--ink)}.g .band{background:var(--p-g)}
+.rk{font:900 2.7em "Big Shoulders Stencil Display",sans-serif}
+.rk small{font:400 .45em "Dela Gothic One",sans-serif;margin-left:.1em}
+.nm{font:400 2.3em "Dela Gothic One",sans-serif;padding:.45em .35em 0;white-space:nowrap;overflow:hidden;letter-spacing:-.02em}
+.ki{font:700 1.2em "BIZ UDPGothic",sans-serif;padding:.45em .67em 0;color:#5a5244}
+.tag{margin:auto .8em .8em;background:var(--koku);color:var(--chalk);height:5.6em;display:flex;align-items:center;padding:0 .9em}
+.sc{font:900 4.6em "Big Shoulders Stencil Display",sans-serif}
+.sc small{font:400 .3em "Dela Gothic One",sans-serif;margin-left:.15em;color:#b9c2b2}
+.flipped .in3{transform:rotateY(180deg)}
+/* 1位：横長の特大札 */
+.solo{grid-template-columns:minmax(0,1fr);padding:1cqw 9cqw 2cqw}
+.solo .card{--fs:1cqw}
+.solo .down b{font-size:16em}
+.solo .up{flex-direction:row}
+.solo .band{width:24em;height:auto;flex-direction:column;justify-content:center;gap:1em}
+.solo .rk{font-size:13em}
+.solo .rk small{font-size:.25em}
+.solo .band em{font:400 1.8em "Dela Gothic One",sans-serif;font-style:normal}
+.solo .mid{flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 3em;gap:1.6em}
+.solo .nm{font-size:7em;padding:0}
+.solo .ki{font-size:2.2em;padding:0}
+.solo .tag{margin:0;height:auto;padding:1em 1.4em;align-self:flex-start}
+.solo .sc{font-size:6em}
+/* カットイン・閃光 */
+.cut{position:absolute;left:0;right:0;top:30%;height:22cqw;display:flex;flex-direction:column;justify-content:center;padding:0 7cqw;gap:1.6cqw;border-block:.8cqw solid var(--shiro);z-index:5;visibility:hidden}
+.cut.r{background:var(--p-r)}.cut.b{background:var(--p-b)}.cut.y{background:var(--p-y);color:var(--ink)}.cut.g{background:var(--p-g)}
+.cut .c1{font:400 6cqw "Dela Gothic One",sans-serif;letter-spacing:-.02em}
+.cut .c2{font:400 2.4cqw "Dela Gothic One",sans-serif;display:flex;align-items:baseline;gap:1.2cqw}
+.cut .c2 b{font:900 5cqw "Big Shoulders Stencil Display",sans-serif}
+.cut .c2 .box{background:var(--shiro);color:var(--ink);padding:.6cqw 1cqw;border:.2cqw solid #000}
+.flash{position:absolute;top:-10%;bottom:-10%;width:14cqw;background:var(--shiro);z-index:8;transform:skewX(-14deg);left:-30cqw;pointer-events:none}
+.title{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2cqw;z-index:2}
+.title b{font:400 7cqw "Dela Gothic One",sans-serif}
+.title span{font:400 2.2cqw "Dela Gothic One",sans-serif;color:var(--kinari2)}
+.title .strip{display:flex;gap:.6cqw}
+.title .strip i{width:7cqw;height:1.4cqw;border:.2cqw solid #000}
+/* 操作 */
+.ctl{flex:1;min-height:0;background:var(--kinari);color:var(--ink);border-top:4px solid var(--aka);display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,2.4fr);gap:12px;padding:12px max(16px,env(safe-area-inset-right,0px)) max(12px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.ctl button{font:700 18px "BIZ UDPGothic",sans-serif;border:2px solid var(--ink);cursor:pointer;color:var(--ink)}
+.next{background:var(--p-y);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-size:24px!important}
+.next small{font-size:14px;font-weight:700}
+.prev{background:var(--shiro)}
+.ctl button:disabled{opacity:.4;cursor:not-allowed}
+.ctl button:hover:not(:disabled){outline:3px solid var(--ink);outline-offset:-6px}
+.steps{display:flex;flex-wrap:wrap;align-content:flex-start;gap:4px;overflow:auto}
+.steps span{font-size:13px;padding:5px 7px;border:2px solid #a89c80;color:#7d735f;background:transparent;white-space:nowrap}
+.steps span.done{background:var(--kinari2);color:var(--ink);border-color:var(--kinari2)}
+.steps span.cur{background:var(--ink);color:var(--shiro);border-color:var(--ink)}
+.steps .kb{flex-basis:100%;font-size:12px;color:#6d6452;border:0;padding:4px 0 0}
+@media(max-width:700px){.ctl{grid-template-columns:1fr 1fr}.steps{grid-column:1/-1}}
+</style>
+
+<div class="wrap"><div class="stage" id="stage">
+  <div class="hd"><div class="no">1R</div><div class="tt"><h1>第1ラウンド　100問ペーパー</h1><p>結果発表</p></div><div class="now" id="now" hidden></div></div>
+  <div class="title" id="title"><b>結果発表</b><span>上位から発表します</span>
+    <div class="strip"><i style="background:var(--p-r)"></i><i style="background:var(--p-b)"></i><i style="background:var(--p-y)"></i><i style="background:var(--p-g)"></i></div></div>
+  <div class="body" id="body"></div>
+  <div class="cut" id="cut"><div class="c1"></div><div class="c2"></div></div>
+  <div class="flash" id="flash"></div>
+</div></div>
+
+<div class="ctl">
+  <button class="next" id="next">次へ<small id="nextL"></small></button>
+  <button class="prev" id="prev">1つ戻る</button>
+  <div class="steps" id="steps"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+{
+const G = window.gsap;
+const NAMES = "しおかぜ ぬまっこ カツオ番長 ひもの 千本松 香貫山 ゆりかもめ アジフライ 狩野川 深海魚 びゅうお 我入道 牛臥 静浦 大瀬崎 戸田 内浦 西浦 片浜 金岡 大岡 門池 愛鷹 はるか みなと うみねこ しらす 桜えび 干物王 サバ缶 タチウオ メヒカリ キンメ イカ釣り 灯台守 防波堤 水門 夕凪 朝凪 潮騒 富士見 帆柱 錨 舳先 船長 甲板 網元 御用邸 氷屋 箱屋 浜焼き 港町 黒潮 白波 若潮 鰺 鯖 鮪 鰹 牛臥山".split(" ");
+const PL = r => r<=5?"r":r<=15?"b":r<=30?"y":"g";
+const P = Array.from({length:60}, (_,i) => ({n:NAMES[i], rank:i+1, c:PL(i+1), k:38 + (i*7)%21, sc:Math.max(31, 92 - Math.round(i*.95 + (i%3)))}));
+/* バッチ構成は参考資料の当てはめ案（未確定）。カットインの文言も案 */
+const B = [
+  {a:1, b:1, c:"r", label:"1位", lay:"solo"},
+  {a:2, b:5, c:"r", label:"2〜5位", cut:["赤プレート","2位〜5位","3○"], cols:4, fs:1.6},
+  {a:6, b:15, c:"b", label:"6〜15位", cut:["青プレート","6位〜15位","2○"], cols:5, fs:.95},
+  {a:16, b:30, c:"y", label:"16〜30位", cut:["黄プレート","16位〜30位","1○"], cols:5, fs:.72},
+  {a:31, b:60, c:"g", label:"31〜60位", cut:["緑プレート","31位〜60位",""], cols:10, fs:.5}
+];
+const STEPS = [{t:"title", label:"タイトル"}];
+B.forEach((b,i) => {
+  if (b.cut) STEPS.push({t:"cut", i, label:`${b.label} カットイン`});
+  STEPS.push({t:"show", i, label:`${b.label} 札を出す`});
+  STEPS.push({t:"flip", i, label:`${b.label} 名前を出す`});
+});
+STEPS.push({t:"end", label:"発表終了"});
+let cur = 0;
+const $ = id => document.getElementById(id);
+const body = $("body"), cut = $("cut"), flash = $("flash"), title = $("title"), now = $("now");
+
+const solo = p => `<div class="card ${p.c}"><div class="in3">
+  <div class="face down"><b>1<small>位</small></b><span>第1ラウンド</span></div>
+  <div class="face up"><div class="band"><span class="rk">1<small>位</small></span><em>赤プレート</em></div>
+    <div class="mid"><div class="nm">${p.n}</div><div class="ki">第${p.k}期</div><div class="tag"><span class="sc">${p.sc}<small>点</small></span></div></div></div></div></div>`;
+const card = p => `<div class="card ${p.c}"><div class="in3">
+  <div class="face down"><b>${p.rank}<small>位</small></b></div>
+  <div class="face up"><div class="band"><span class="rk">${p.rank}<small>位</small></span></div>
+    <div class="nm">${p.n}</div><div class="ki">第${p.k}期</div><div class="tag"><span class="sc">${p.sc}<small>点</small></span></div></div></div></div>`;
+function drawBatch(i, flipped){
+  const b = B[i], ps = P.slice(b.a-1, b.b);
+  body.className = "body" + (b.lay==="solo" ? " solo" : "");
+  body.style.gridTemplateColumns = b.lay==="solo" ? "" : `repeat(${b.cols},minmax(0,1fr))`;
+  body.style.gridTemplateRows = b.lay==="solo" ? "" : `repeat(${Math.ceil(ps.length/b.cols)},minmax(0,1fr))`;
+  body.style.setProperty("--fs", (b.fs||1) + "cqw");
+  body.innerHTML = b.lay==="solo" ? solo(ps[0]) : ps.map(card).join("");
+  if (flipped) body.querySelectorAll(".card").forEach(c => c.classList.add("flipped"));
+  now.hidden = false; now.innerHTML = b.a===b.b ? `<b>${b.a}</b>位` : `<b>${b.a}</b>位〜<b>${b.b}</b>位`;
+}
+function drawCut(i){
+  const b = B[i];
+  cut.className = "cut " + b.c;
+  cut.querySelector(".c1").textContent = b.cut[0];
+  cut.querySelector(".c2").innerHTML = `<span>${b.cut[1]}</span><span class="box">${b.cut[2] ? `2R アドバンテージ <b>${b.cut[2]}</b>` : "2R アドバンテージ なし"}</span>`;
+}
+/* 静的に描く（戻る・初期表示） */
+function paint(k){
+  if (G) { G.killTweensOf("*"); G.set([cut, flash, body], {clearProps:"all"}); }
+  const s = STEPS[k];
+  title.hidden = s.t !== "title";
+  cut.style.visibility = "hidden";
+  body.innerHTML = ""; now.hidden = true;
+  if (s.t === "cut") { drawCut(s.i); cut.style.visibility = "visible"; }
+  if (s.t === "show" || s.t === "flip") drawBatch(s.i, s.t === "flip");
+  if (s.t === "end") { drawBatch(B.length-1, true); }
+  ui();
+}
+/* 演出つきで1段進める */
+function sweep(){ return G.fromTo(flash, {left:"-30cqw"}, {left:"130%", duration:.45, ease:"power2.inOut"}); }
+function advance(){
+  if (cur >= STEPS.length-1) return;
+  const s = STEPS[++cur]; ui();
+  if (!G) { paint(cur); return; }
+  G.killTweensOf("*");
+  if (s.t === "cut") {
+    sweep();
+    G.delayedCall(.2, () => { title.hidden = true; body.innerHTML = ""; now.hidden = true; drawCut(s.i); cut.style.visibility = "visible";
+      G.fromTo(cut, {xPercent:-100}, {xPercent:0, duration:.45, ease:"power3.out"});
+      G.fromTo(cut.children, {x:-60, opacity:0}, {x:0, opacity:1, duration:.5, stagger:.12, delay:.2, ease:"power2.out"}); });
+  } else if (s.t === "show") {
+    const enter = () => {
+      title.hidden = true; cut.style.visibility = "hidden"; G.set(cut, {clearProps:"all"});
+      drawBatch(s.i, false);
+      const cs = body.querySelectorAll(".card");
+      G.fromTo(cs, {rotateY:90, scale:.55, opacity:0}, {rotateY:0, scale:1, opacity:1, duration:.7, ease:"back.out(1.7)", stagger: cs.length > 20 ? .03 : cs.length > 5 ? .07 : .1});
+    };
+    if (cut.style.visibility === "visible") G.to(cut, {xPercent:100, duration:.35, ease:"power3.in", onComplete:enter});
+    else { sweep(); G.delayedCall(.2, enter); }
+  } else if (s.t === "flip") {
+    const ins = body.querySelectorAll(".in3");
+    G.to(ins, {rotateY:180, duration:.8, ease:"back.out(1.6)", stagger: ins.length > 20 ? .035 : ins.length > 5 ? .08 : 0,
+      onComplete:() => { body.querySelectorAll(".card").forEach(c => c.classList.add("flipped")); G.set(ins, {clearProps:"transform"}); }});
+  } else paint(cur);
+}
+function back(){ if (cur > 0) { cur--; paint(cur); } }
+function ui(){
+  $("steps").innerHTML = STEPS.map((s,k) => `<span class="${k<cur?"done":k===cur?"cur":""}">${s.label}</span>`).join("") + `<span class="kb">キー操作: スペース / → で次へ、← で1つ戻る</span>`;
+  $("next").disabled = cur >= STEPS.length-1;
+  $("prev").disabled = cur === 0;
+  $("nextL").textContent = cur < STEPS.length-1 ? STEPS[cur+1].label : "最後まで進みました";
+}
+$("next").onclick = advance;
+$("prev").onclick = back;
+document.addEventListener("keydown", e => { if (e.key===" " || e.key==="ArrowRight") { e.preventDefault(); advance(); } if (e.key==="ArrowLeft") back(); });
+paint(0);
+}
+</script>
