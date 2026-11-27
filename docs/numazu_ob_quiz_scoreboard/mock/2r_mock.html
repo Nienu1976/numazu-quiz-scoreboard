@@ -1,0 +1,309 @@
+<title>2R 競り札モック</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Big+Shoulders+Stencil+Display:wght@700;900&family=BIZ+UDPGothic:wght@700&display=swap" rel="stylesheet">
+<style>
+/* VOICE occasion（会場で観客が見る競り場）／操作部は work
+   IDEA 沼津港の朝の競り：参加者は競り札、得点は値札、勝抜は「落札」、連答権は港の信号灯
+   PICTURE 16:9 の競り場ボード（札12枚＋落札レール）。下の操作ストリップで動く
+   COLOUR 駿河湾の藍の地、生成りの札、船体の赤白、錆、黒板。全てフラット
+   TYPE Dela Gothic One（札・看板）＋ Big Shoulders Stencil（番号標識の数字）＋ BIZ UDPゴシック（操作）
+   LAYOUT 上 約72% にプロジェクター画面、下に 名前/○/× の3行ストリップ＋右に戻す/スルー */
+:root{color-scheme:dark;--ai:#0e2240;--ai2:#16325a;--sea:#0a1a33;--kinari:#e9dfc6;--kinari2:#d8ccad;--shiro:#f6f3ec;--aka:#c8102e;--sabi:#8c3f1e;--sabi2:#5e2a14;--koku:#1f2b26;--chalk:#eef0e6;--sig:#3ee08f;--ink:#141414;
+--p-r:#c8102e;--p-b:#2058b8;--p-y:#f0b400;--p-g:#1d8a4b}
+*{box-sizing:border-box;min-width:0}
+html,body{height:100%;margin:0}
+body{background:var(--sea);color:var(--shiro);font:15px/1.4 "BIZ UDPGothic",sans-serif;display:flex;flex-direction:column;overflow:hidden}
+.wrap{flex:none;display:grid;place-items:center;padding:12px max(16px,env(safe-area-inset-left,0px)) 8px max(16px,env(safe-area-inset-right,0px))}
+.stage{position:relative;container-type:inline-size;width:min(100%,calc(70dvh*16/9));aspect-ratio:16/9;background:var(--ai);overflow:hidden;border:2px solid #000}
+.stage *{line-height:1}
+/* header */
+.hd{position:absolute;left:2cqw;right:2cqw;top:1.6cqw;height:7cqw;display:flex;gap:1.6cqw;align-items:stretch}
+.no{background:var(--shiro);color:var(--ink);border:.5cqw solid var(--aka);width:7cqw;display:grid;place-items:center;font:900 5cqw "Big Shoulders Stencil Display",Impact,sans-serif}
+.tt{display:flex;flex-direction:column;justify-content:center;gap:.8cqw}
+.tt h1{margin:0;font:400 2.9cqw "Dela Gothic One",sans-serif;letter-spacing:-.02em}
+.tt p{margin:0;font:700 1.3cqw "BIZ UDPGothic",sans-serif;color:var(--kinari2)}
+.tt p b{font:900 1.8cqw "Big Shoulders Stencil Display",sans-serif;color:var(--shiro);margin:0 .3cqw}
+.rail{margin-left:auto;display:flex;gap:.6cqw;align-items:stretch}
+.rail .lb{writing-mode:vertical-rl;background:var(--aka);color:var(--shiro);font:400 1.5cqw "Dela Gothic One",sans-serif;display:grid;place-items:center;padding:0 .5cqw}
+.slot{width:8.4cqw;border:.25cqw dashed #4a6489;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:.5cqw;color:#4a6489;font:900 2.4cqw "Big Shoulders Stencil Display",sans-serif}
+.slot.f{border:.25cqw solid var(--shiro);background:var(--shiro);color:var(--ink)}
+.slot.f .s{font-size:1.9cqw;color:var(--aka)}
+.slot.f .n{font:400 1.25cqw "Dela Gothic One",sans-serif;max-width:7.6cqw;white-space:nowrap;overflow:hidden}
+/* board */
+.grid{position:absolute;left:2cqw;right:2cqw;top:12.4cqw;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));column-gap:1.4cqw;row-gap:3.9cqw}
+.card{position:relative;height:16.6cqw;perspective:60cqw}
+.flip{position:absolute;inset:0;transform-style:preserve-3d;transition:none}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border:.22cqw solid #000}
+.front{background:var(--kinari);color:var(--ink);display:flex;flex-direction:column}
+.back{background:var(--sabi);color:var(--kinari);transform:rotateY(180deg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1cqw}
+.back .big{font:400 3.6cqw "Dela Gothic One",sans-serif;color:var(--kinari);border:.3cqw solid var(--kinari);padding:.6cqw .8cqw}
+.back .nm{font:400 1.4cqw "Dela Gothic One",sans-serif;opacity:.8}
+.band{height:3.2cqw;display:flex;align-items:center;justify-content:space-between;padding:0 .8cqw;color:var(--shiro)}
+.r .band{background:var(--p-r)}.b .band{background:var(--p-b)}.y .band{background:var(--p-y);color:var(--ink)}.g .band{background:var(--p-g)}
+.seat{font:900 2.6cqw "Big Shoulders Stencil Display",sans-serif}
+.pl{font:400 1.2cqw "Dela Gothic One",sans-serif;border:.18cqw solid currentColor;padding:.25cqw .35cqw}
+.hole{position:absolute;top:.9cqw;left:50%;width:.9cqw;height:.9cqw;margin-left:-.45cqw;background:var(--ai);border:.15cqw solid #000}
+.nm1{font:400 1.75cqw "Dela Gothic One",sans-serif;padding:.9cqw .8cqw 0;white-space:nowrap;overflow:hidden;letter-spacing:-.02em}
+.ki{font:700 1.1cqw "BIZ UDPGothic",sans-serif;padding:.45cqw .8cqw 0;color:#5a5244}
+.tag{margin:.7cqw .8cqw 0;background:var(--koku);color:var(--chalk);height:5.4cqw;display:flex;align-items:center;justify-content:space-between;padding:0 .8cqw;perspective:20cqw}
+.num{font:900 4.9cqw "Big Shoulders Stencil Display",sans-serif;transform-origin:50% 50%;display:inline-block;min-width:3cqw}
+.unit{text-align:right;font:700 1.1cqw "BIZ UDPGothic",sans-serif;color:#b9c2b2}
+.unit b{display:block;font:400 2cqw "Dela Gothic One",sans-serif;color:var(--chalk);margin-bottom:.4cqw}
+.meter{display:flex;justify-content:space-between;align-items:center;margin:.7cqw .8cqw 0}
+.pips,.xs{display:flex;gap:.3cqw}
+.pips i{width:1.25cqw;height:1.25cqw;border:.18cqw solid var(--koku);display:block}
+.pips i.on{background:var(--aka);border-color:var(--aka)}
+.xs i{width:1.6cqw;height:1.6cqw;border:.18cqw solid var(--sabi);display:grid;place-items:center;font:900 1.4cqw "BIZ UDPGothic",sans-serif;font-style:normal;color:transparent}
+.xs i.on{background:var(--sabi);color:var(--kinari)}
+/* 信号灯（マスト） */
+.mast{position:absolute;right:1.4cqw;top:-3.6cqw;width:2.4cqw;height:3.6cqw;z-index:2}
+.mast::before{content:"";position:absolute;left:1.05cqw;top:2cqw;width:.3cqw;height:1.6cqw;background:#000}
+.lamp{position:absolute;left:.2cqw;top:0;width:2cqw;height:2cqw;background:#33425a;border:.22cqw solid #000}
+.beam{position:absolute;top:-.3cqw;width:4.2cqw;height:2.6cqw;background:var(--sig);opacity:0;pointer-events:none}
+.beam.l{right:2.4cqw;clip-path:polygon(100% 40%,0 0,0 100%,100% 60%)}
+.beam.rr{left:2.4cqw;clip-path:polygon(0 40%,100% 0,100% 100%,0 60%)}
+.rt .lamp{background:var(--sig)}
+.rt .beam{opacity:.55}
+.rt .front{outline:.35cqw solid var(--sig);outline-offset:.15cqw}
+.rtchip{display:none;position:absolute;right:.8cqw;top:3.7cqw;background:var(--sig);color:#062814;font:400 1cqw "Dela Gothic One",sans-serif;padding:.3cqw .4cqw}
+.rt .rtchip{display:block}
+/* 落札 */
+.stamp{position:absolute;left:50%;top:52%;width:9.6cqw;height:9.6cqw;margin:-4.8cqw 0 0 -4.8cqw;background:var(--aka);color:var(--shiro);border:.4cqw solid var(--shiro);outline:.3cqw solid var(--aka);display:grid;place-items:center;font:400 3.4cqw "Dela Gothic One",sans-serif;writing-mode:vertical-rl;opacity:0;transform:rotate(-10deg) scale(1);z-index:3;pointer-events:none}
+.win .stamp{opacity:1}
+.win .front{background:var(--shiro)}
+.win .tag{background:var(--aka)}
+/* 失格：反転＋沈む */
+.out .flip{transform:rotateY(180deg)}
+.out{translate:0 .7cqw}
+.sea{position:absolute;left:-.3cqw;right:-.3cqw;bottom:-.3cqw;height:0;background:var(--sea);clip-path:polygon(0 1.2cqw,8% 0,16% 1.2cqw,24% 0,32% 1.2cqw,40% 0,48% 1.2cqw,56% 0,64% 1.2cqw,72% 0,80% 1.2cqw,88% 0,96% 1.2cqw,100% .4cqw,100% 100%,0 100%);z-index:2}
+.out .sea{height:34%}
+.out .mast{opacity:.25}
+.plus{position:absolute;left:0;right:0;top:-1cqw;text-align:center;font:400 2.2cqw "Dela Gothic One",sans-serif;color:var(--sig);z-index:4;pointer-events:none}
+/* footer & flash */
+.ft{position:absolute;left:2cqw;right:2cqw;bottom:1.4cqw;height:3.4cqw;background:var(--koku);color:var(--chalk);display:flex;align-items:center;gap:1.4cqw;padding:0 1.2cqw;font:700 1.35cqw "BIZ UDPGothic",sans-serif;border:.2cqw solid #000}
+.ft .k{font:400 1.2cqw "Dela Gothic One",sans-serif;background:var(--chalk);color:var(--koku);padding:.4cqw .5cqw}
+.ft .rule{margin-left:auto;color:#a9b3a2;font-size:1.15cqw}
+.flash{position:absolute;left:0;right:0;top:38%;height:11cqw;background:var(--aka);color:var(--shiro);display:flex;align-items:center;justify-content:center;gap:3cqw;font:400 5.2cqw "Dela Gothic One",sans-serif;border-block:.6cqw solid var(--shiro);z-index:10;visibility:hidden}
+.flash small{font:900 3.4cqw "Big Shoulders Stencil Display",sans-serif}
+.mini{position:absolute;background:var(--shiro);border:.25cqw solid #000;z-index:9;pointer-events:none}
+/* 操作ストリップ */
+.ctl{flex:1;min-height:0;background:var(--kinari);color:var(--ink);border-top:4px solid var(--aka);display:flex;gap:12px;padding:10px max(16px,env(safe-area-inset-right,0px)) max(10px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.strip{flex:1;overflow-x:auto}
+.cols{display:grid;grid-template-columns:repeat(12,minmax(64px,1fr));gap:4px;min-width:820px;height:100%;grid-template-rows:auto 1fr 1fr}
+.who{background:var(--shiro);border:2px solid var(--ink);padding:5px 6px 6px;display:flex;flex-direction:column;gap:3px}
+.who .t{display:flex;justify-content:space-between;align-items:center}
+.who .sn{font:900 19px "Big Shoulders Stencil Display",sans-serif;color:#fff;padding:0 5px}
+.who.r .sn{background:var(--p-r)}.who.b .sn{background:var(--p-b)}.who.y .sn{background:var(--p-y);color:#000}.who.g .sn{background:var(--p-g)}
+.who .st{font-size:13px;white-space:nowrap}
+.who .n{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.who .rk{font-size:12px;background:var(--sig);color:#062814;padding:1px 4px;align-self:flex-start}
+.who.done{opacity:.5}
+.cols button{color:#fff;font:700 28px "BIZ UDPGothic",sans-serif;border:2px solid var(--ink);cursor:pointer;min-height:40px}
+.bo{background:var(--aka);color:#fff}
+.bx{background:var(--ai);color:#fff}
+.cols button:hover:not(:disabled){outline:3px solid var(--p-y);outline-offset:-5px}
+.cols button:active:not(:disabled){translate:0 2px}
+.cols button:disabled{background:var(--kinari2);color:#8d8371;border-color:#a89c80;cursor:not-allowed;font-size:13px}
+.side{width:200px;flex:none;display:flex;flex-direction:column;gap:6px}
+.side button{color:var(--ink);font:700 16px "BIZ UDPGothic",sans-serif;border:2px solid var(--ink);cursor:pointer;padding:8px}
+.undo{background:var(--p-y);font-size:20px!important;flex:1}
+.thru{background:var(--shiro)}
+.rst{background:transparent;font-size:13px!important;padding:4px!important}
+.last{font-size:13px;background:var(--koku);color:var(--chalk);padding:6px 8px;min-height:2.6em}
+@media(max-width:700px){.side{width:120px}.undo{font-size:16px!important}}
+</style>
+
+<div class="wrap"><div class="stage" id="stage">
+  <div class="hd">
+    <div class="no">2R</div>
+    <div class="tt"><h1>連答つき 5○2×</h1><p>第一組<b id="q">1</b>問目　勝抜 6 名まで</p></div>
+    <div class="rail"><div class="lb">落札</div><div id="rail" style="display:flex;gap:.6cqw"></div></div>
+  </div>
+  <div class="grid" id="grid"></div>
+  <div class="ft"><span class="k">直前</span><span id="lastS">競り開始。初期 赤3○ 青2○ 黄1○</span><span class="rule">正解で連答権　連答権中の正解は 2○</span></div>
+  <div class="flash" id="flash"></div>
+</div></div>
+
+<div class="ctl">
+  <div class="strip"><div class="cols" id="cols"></div></div>
+  <div class="side">
+    <button class="undo" id="undo">1手戻す</button>
+    <button class="thru" id="thru">スルー</button>
+    <div class="last" id="lastC">操作はまだありません</div>
+    <button class="rst" id="rst">最初から（ダミーに戻す）</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+{
+const G = window.gsap;
+const PL = {r:"赤",b:"青",y:"黄",g:"緑"};
+const INIT = {r:3,b:2,y:1,g:0};
+const PEOPLE = [["しおかぜ",48,"g"],["ぬまっこ",52,"b"],["カツオ番長",39,"y"],["ひもの",55,"g"],["千本松",44,"r"],["香貫山",50,"g"],
+  ["ゆりかもめ",57,"y"],["アジフライ",46,"g"],["狩野川",41,"b"],["深海魚",53,"g"],["びゅうお",49,"y"],["我入道",58,"g"]];
+const WIN = 5, LOSE = 2, SEATS_WIN = 6;
+const fresh = () => ({p:PEOPLE.map(([n,k,c]) => ({n,k,c,o:INIT[c],x:0,st:"play"})), holder:null, winners:[], q:1, last:"", done:false});
+let S = fresh(), H = [];
+const $ = id => document.getElementById(id);
+const stage = $("stage"), grid = $("grid"), cols = $("cols"), rail = $("rail"), flash = $("flash");
+const pad = i => String(i+1).padStart(2,"0");
+
+grid.innerHTML = S.p.map((p,i) => `
+<div class="card ${p.c}" data-i="${i}">
+  <div class="mast"><i class="beam l"></i><i class="beam rr"></i><div class="lamp"></div></div>
+  <div class="flip">
+    <div class="face front">
+      <div class="band"><span class="seat">${pad(i)}</span><span class="hole"></span><span class="pl">${PL[p.c]}札</span></div>
+      <span class="rtchip">連答権</span>
+      <div class="nm1"></div><div class="ki"></div>
+      <div class="tag"><span class="num"></span><span class="unit"><b>○</b>あと<span class="rest"></span></span></div>
+      <div class="meter"><span class="pips">${"<i></i>".repeat(WIN)}</span><span class="xs">${"<i>×</i>".repeat(LOSE)}</span></div>
+    </div>
+    <div class="face back"><span class="big">失格</span><span class="nm"></span></div>
+  </div>
+  <div class="sea"></div>
+  <div class="stamp">落札</div>
+</div>`).join("");
+const cards = [...grid.children];
+cards.forEach((c,i) => { c.querySelector(".nm1").textContent = S.p[i].n; c.querySelector(".ki").textContent = `第${S.p[i].k}期`; c.querySelector(".back .nm").textContent = `${pad(i)} ${S.p[i].n}`; });
+
+function rc(i){
+  const p = S.p[i], c = cards[i];
+  if (G) G.set([c, c.querySelector(".flip"), c.querySelector(".stamp"), c.querySelector(".sea"), c.querySelector(".num"), ...c.querySelectorAll(".beam,.lamp,.xs i")], {clearProps:"all"});
+  c.classList.toggle("win", p.st==="win");
+  c.classList.toggle("out", p.st==="out");
+  c.classList.toggle("rt", S.holder===i);
+  c.querySelector(".num").textContent = p.o;
+  c.querySelector(".rest").textContent = Math.max(0, WIN-p.o);
+  c.querySelectorAll(".pips i").forEach((e,k) => e.classList.toggle("on", k < p.o));
+  c.querySelectorAll(".xs i").forEach((e,k) => e.classList.toggle("on", k < p.x));
+}
+function renderRail(){
+  rail.innerHTML = Array.from({length:SEATS_WIN}, (_,k) => {
+    const w = S.winners[k];
+    if (w===undefined) return `<div class="slot">${k+1}</div>`;
+    return `<div class="slot f"><span class="s">${k+1}抜 ${pad(w)}</span><span class="n">${S.p[w].n}</span></div>`;
+  }).join("");
+}
+function renderCtl(){
+  cols.innerHTML =
+    S.p.map((p,i) => `<div class="who ${p.c} ${p.st!=="play"?"done":""}"><div class="t"><span class="sn">${pad(i)}</span><span class="st">${p.st==="win"?"勝抜":p.st==="out"?"失格":`${p.o}○ ${p.x}×`}</span></div><span class="n">${p.n}</span>${S.holder===i?'<span class="rk">連答権</span>':""}</div>`).join("") +
+    S.p.map((p,i) => `<button class="bo" data-a="o" data-i="${i}" ${p.st!=="play"||S.done?"disabled":""}>${p.st==="win"?"勝抜":p.st==="out"?"失格":"○"}</button>`).join("") +
+    S.p.map((p,i) => `<button class="bx" data-a="x" data-i="${i}" ${p.st!=="play"||S.done?"disabled":""}>${p.st==="play"?"×":"—"}</button>`).join("");
+  $("q").textContent = S.q;
+  $("lastS").textContent = S.last || "競り開始。初期 赤3○ 青2○ 黄1○";
+  $("lastC").textContent = S.last ? `直前: ${S.last}` : "操作はまだありません";
+  $("undo").disabled = !H.length;
+}
+function renderAll(){
+  if (G) G.killTweensOf("*");
+  document.querySelectorAll(".mini,.plus").forEach(e => e.remove());
+  cards.forEach((_,i) => rc(i)); renderRail(); renderCtl();
+  flash.style.visibility = S.done ? "visible" : "hidden";
+  if (G) G.set(flash, {clearProps:"transform"});
+  if (S.done) flash.innerHTML = `競り終了<small>勝抜 ${SEATS_WIN} 名</small>`;
+}
+
+/* ---- 演出 ---- */
+const rel = el => { const a = el.getBoundingClientRect(), s = stage.getBoundingClientRect(), k = stage.offsetWidth / s.width; return {x:(a.left-s.left)*k, y:(a.top-s.top)*k, w:a.width*k, h:a.height*k}; };
+function flipNum(c, v){
+  const n = c.querySelector(".num");
+  if (!G) { n.textContent = v; return; }
+  G.timeline().to(n, {rotateX:90, duration:.12, ease:"power1.in", onComplete:() => n.textContent = v})
+    .fromTo(n, {rotateX:-90}, {rotateX:0, duration:.45, ease:"back.out(3)"});
+}
+function hop(c){ if (G) G.timeline().to(c, {y:-stage.offsetWidth*.014, duration:.15, ease:"power2.out"}).to(c, {y:0, duration:.6, ease:"bounce.out"}); }
+function plus(c, t){
+  if (!G) return;
+  const e = document.createElement("div"); e.className = "plus"; e.textContent = t; c.appendChild(e);
+  G.fromTo(e, {y:0, opacity:1}, {y:-stage.offsetWidth*.03, opacity:0, duration:1.2, ease:"power1.out", onComplete:() => e.remove()});
+}
+function lampOn(c){
+  if (!G) return;
+  G.fromTo(c.querySelectorAll(".beam"), {opacity:0, scaleX:.1}, {opacity:.55, scaleX:1, duration:.18, repeat:3, yoyo:true, ease:"steps(2)"});
+  G.fromTo(c.querySelector(".lamp"), {backgroundColor:"#ffffff"}, {backgroundColor:"#3ee08f", duration:.5, ease:"steps(3)"});
+}
+function lampOff(c){ if (!G) return; const l = c.querySelector(".lamp"), bm = c.querySelectorAll(".beam"); G.killTweensOf([l, ...bm]); G.set(l, {clearProps:"backgroundColor"}); G.to(bm, {opacity:0, duration:.2, onComplete:() => G.set(bm, {clearProps:"all"})}); }
+function slamWin(i, slot){
+  const c = cards[i], st = c.querySelector(".stamp");
+  const tl = G.timeline({delay:.55});
+  tl.fromTo(st, {opacity:0, scale:3.4, rotation:-28}, {opacity:1, scale:1, rotation:-10, duration:.22, ease:"power4.in"})
+    .fromTo(stage, {x:-10, y:6}, {x:0, y:0, duration:.5, ease:"elastic.out(1.2,.25)"})
+    .add(() => { c.classList.add("win"); flash.innerHTML = `落札<small>${pad(i)}</small>${S.p[i].n}<small>${slot+1}抜</small>`; flash.style.visibility = "visible"; }, "<")
+    .fromTo(flash, {xPercent:-100}, {xPercent:0, duration:.28, ease:"power3.out"}, "<")
+    .to(flash, {xPercent:100, duration:.3, ease:"power3.in", delay:.75})
+    .add(() => { flash.style.visibility = "hidden"; G.set(flash, {clearProps:"transform"}); rc(i); flyTo(i, slot); });
+}
+function flyTo(i, slot){
+  const from = rel(cards[i]), to = rel(rail.children[slot]);
+  const m = document.createElement("div"); m.className = "mini"; stage.appendChild(m);
+  G.set(m, {left:from.x, top:from.y, width:from.w, height:from.h});
+  G.to(m, {left:to.x, top:to.y, width:to.w, height:to.h, rotation:360, duration:.7, ease:"power3.inOut", onComplete:() => {
+    m.remove(); renderRail();
+    G.fromTo(rail.children[slot], {scale:1.35}, {scale:1, duration:.4, ease:"back.out(4)"});
+    if (S.done) endShow();
+  }});
+}
+function endShow(){
+  flash.innerHTML = `競り終了<small>勝抜 ${SEATS_WIN} 名</small>`; flash.style.visibility = "visible";
+  G.fromTo(flash, {scaleY:0}, {scaleY:1, duration:.4, ease:"back.out(2)"});
+}
+function sink(i){
+  const c = cards[i];
+  G.timeline({delay:.35})
+    .to(c.querySelector(".flip"), {rotateY:180, duration:.75, ease:"power2.inOut"})
+    .to(c.querySelector(".sea"), {height:"34%", duration:1.1, ease:"power1.inOut"}, "-=.2")
+    .to(c, {y:stage.offsetWidth*.007, duration:1.1, ease:"power1.inOut"}, "<")
+    .add(() => rc(i));
+}
+
+/* ---- ルール ---- */
+function act(kind, i){
+  if (S.done) return;
+  if (kind!=="thru" && S.p[i].st!=="play") return;
+  H.push(JSON.stringify(S));
+  const prev = S.holder;
+  if (kind==="thru"){ S.q++; S.last = `${S.q-1}問目 スルー`; renderCtl(); $("q").textContent = S.q; return; }
+  const p = S.p[i], c = cards[i];
+  if (kind==="o"){
+    const gain = prev===i ? 2 : 1;
+    p.o += gain;
+    S.holder = gain===2 ? null : i;           // 連答権中の正解で消費。通常正解で獲得（他人の権利は消える）
+    if (p.o >= WIN){ p.st = "win"; S.winners.push(i); S.holder = null; }
+    S.last = `${pad(i)} ${p.n} ○ +${gain}${gain===2?"（連答）":""}${p.st==="win"?" 勝抜":""}`;
+    if (S.winners.length >= SEATS_WIN) S.done = true;
+    S.q++;
+    renderCtl();
+    if (!G){ renderAll(); return; }
+    flipNum(c, p.o); hop(c); plus(c, gain===2 ? "+2 連答" : "+1");
+    c.querySelectorAll(".pips i").forEach((e,k) => e.classList.toggle("on", k < p.o));
+    c.querySelector(".rest").textContent = Math.max(0, WIN-p.o);
+    if (prev!==null && prev!==S.holder){ const pc = cards[prev]; lampOff(pc); pc.classList.remove("rt"); }
+    if (S.holder===i && prev!==i){ c.classList.add("rt"); lampOn(c); }
+    if (S.holder!==i) c.classList.remove("rt");
+    if (p.st==="win") slamWin(i, S.winners.length-1);
+  } else {
+    p.x++;
+    if (prev===i) S.holder = null;
+    if (p.x >= LOSE) p.st = "out";
+    S.last = `${pad(i)} ${p.n} ×${p.st==="out"?" 失格":""}`;
+    S.q++;
+    renderCtl();
+    if (!G){ renderAll(); return; }
+    const box = c.querySelectorAll(".xs i")[p.x-1];
+    box.classList.add("on");
+    G.fromTo(box, {scale:2.6, rotation:-20}, {scale:1, rotation:0, duration:.3, ease:"power4.in"});
+    G.fromTo(c, {x:-stage.offsetWidth*.006}, {x:0, duration:.5, ease:"elastic.out(1.4,.2)"});
+    if (prev===i){ lampOff(c); c.classList.remove("rt"); }
+    if (p.st==="out") sink(i);
+  }
+}
+cols.addEventListener("click", e => { const b = e.target.closest("button"); if (b && !b.disabled) act(b.dataset.a, +b.dataset.i); });
+$("thru").onclick = () => act("thru");
+$("undo").onclick = () => { if (!H.length) return; S = JSON.parse(H.pop()); renderAll(); };
+$("rst").onclick = () => { H = []; S = fresh(); renderAll(); };
+renderAll();
+}
+</script>
