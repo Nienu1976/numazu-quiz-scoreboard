@@ -5,6 +5,7 @@ import { resolve } from 'node:path';
 export default defineConfig({
   base: './',
   build: {
+    assetsInlineLimit: 0, // フォントを必ず同梱ファイルとして出力（オフライン動作）
     rollupOptions: {
       input: {
         control: resolve(__dirname, 'control.html'),

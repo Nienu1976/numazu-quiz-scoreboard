@@ -27,6 +27,36 @@ function set(next: AppData) {
   broadcast();
 }
 
+// ---------- 投影開始（外部ディスプレイへ全画面） ----------
+let displayWin: Window | null = null;
+function projMsg(t: string) { const el = document.getElementById('projmsg'); if (el) el.textContent = t; }
+
+async function startProjection() {
+  const url = new URL('display.html', location.href).href;
+  if (displayWin && !displayWin.closed) { displayWin.focus(); projMsg('表示画面は開いています'); return; }
+  type Scr = { left: number; top: number; width: number; height: number; availLeft: number; availTop: number; availWidth: number; availHeight: number; isPrimary?: boolean };
+  const w = window as unknown as { getScreenDetails?: () => Promise<{ screens: Scr[]; currentScreen: Scr }> };
+  try {
+    if (w.getScreenDetails) {
+      const sd = await w.getScreenDetails();
+      const ext = sd.screens.find((s) => s !== sd.currentScreen && !s.isPrimary) ?? sd.screens.find((s) => s !== sd.currentScreen);
+      if (ext) {
+        displayWin = window.open(url, 'numazu-display', `left=${ext.availLeft},top=${ext.availTop},width=${ext.availWidth},height=${ext.availHeight}`);
+        if (displayWin) {
+          // 外部ディスプレイ上で全画面化を試みる（ブラウザが拒否したら表示画面側の「全画面にする」ボタンで）
+          try { await displayWin.document.documentElement.requestFullscreen(); projMsg('外部ディスプレイに全画面で開きました'); }
+          catch { projMsg('外部ディスプレイで開きました。表示画面の「全画面にする」ボタン（またはダブルクリック）で全画面にしてください'); }
+          return;
+        }
+      }
+    }
+  } catch { /* 権限拒否・非対応 → 下のフォールバックへ */ }
+  displayWin = window.open(url, 'numazu-display', 'width=1280,height=720');
+  projMsg(displayWin
+    ? '外部ディスプレイを自動検出できませんでした。開いた表示画面を手動でプロジェクターの画面へ移動し、「全画面にする」ボタン（またはダブルクリック）を押してください'
+    : 'ポップアップがブロックされました。許可してもう一度押してください');
+}
+
 // ---------- 画面 ----------
 function render() {
   const fin = r1Finalized(data);
@@ -35,7 +65,7 @@ function render() {
   app.innerHTML = `
   <header class="top"><h1>沼東OB例会 操作画面</h1>
     <nav class="tabs">${tabBtn('players', '参加者')}${tabBtn('r1', '1R 点数入力')}${tabBtn('r2', '2R 早押し', !fin)}</nav>
-    <div class="sp"></div><div class="meta">自動保存中（この画面を閉じても復元されます）</div></header>
+    <div class="sp"></div><button class="btn pri" data-act="project" title="外部ディスプレイに表示画面を全画面で開きます">投影開始</button><span class="meta" id="projmsg"></span><div class="meta">自動保存中（この画面を閉じても復元されます）</div></header>
   <main>${data.ui.tab === 'players' ? viewPlayers() : data.ui.tab === 'r1' ? viewR1() : viewR2()}</main>`;
 }
 
@@ -178,6 +208,7 @@ app.addEventListener('click', (e) => {
   const a = el.dataset.act!;
   const gi = data.ui.group;
   switch (a) {
+    case 'project': return void startProjection();
     case 'tab': return set({ ...data, ui: { ...data.ui, tab: el.dataset.tab as Tab } });
     case 'group': return set({ ...data, ui: { ...data.ui, group: Number(el.dataset.g) } });
     case 'del': if (confirm('この参加者を削除しますか？')) set(removePlayer(data, el.dataset.id!)); return;

@@ -53,8 +53,8 @@
 - [x] 操作画面: ペーパー得点入力（1Rのみ。ExR1は未） — control-dev
 - [~] 操作画面: 早押し入力（3行レイアウト）2R実装済み。3R以降は未 — control-dev
 - [~] 操作画面: 組分け（2R蛇腹・席入替）済み。コース選択・SF組分けは未 — control-dev
-- [ ] 表示画面: 自動投影（Window Management API） — display-dev
-- [ ] 表示画面: ラウンド別表示・演出 — display-dev
+- [x] 表示画面: 自動投影（Window Management API）— 操作画面「投影開始」。外部ディスプレイ検出→全画面。不可時は通常ウィンドウ＋手動移動案内（実機の複数ディスプレイは未確認） — display-dev
+- [~] 表示画面: ラウンド別表示・演出 — 2R 3Dを display.html に移植済み（src/display/、受信状態の差分から演出、undoは演出なし）。1Rは確定後の順位・プレート色の簡易表示。3R以降は未対応 — display-dev
 - [ ] PWA化（オフライン起動） — display-dev
 - [ ] エントリーページ — entry-dev
 - [ ] GAS（スプレッドシート連携・締切判定） — entry-dev

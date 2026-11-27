@@ -1,0 +1,53 @@
+@import './fonts/dela-gothic-one.css';
+@import './fonts/big-shoulders-700.css';
+@import './fonts/big-shoulders-900.css';
+@import './fonts/biz-udpgothic-700.css';
+:root{
+  color-scheme:dark;
+  --ai:#0e2240;--sea:#0a1a33;--kinari:#e9dfc6;--kinari2:#d8ccad;--shiro:#f6f3ec;
+  --aka:#c8102e;--sabi:#8c3f1e;--koku:#1f2b26;--chalk:#eef0e6;--sig:#3ee08f;--ink:#141414;
+  --p-r:#c8102e;--p-b:#2058b8;--p-y:#f0b400;--p-g:#1d8a4b;
+}
+*{box-sizing:border-box;min-width:0}
+html,body{height:100%;margin:0}
+body{background:#000;color:var(--shiro);font:15px/1.4 "BIZ UDPGothic",sans-serif;display:grid;place-items:center;overflow:hidden}
+.stage{
+  position:relative;container-type:inline-size;
+  width:min(100vw,calc(100vh * 16/9));aspect-ratio:16/9;
+  background:var(--ai);overflow:hidden;
+}
+.stage *{line-height:1}
+#glCanvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.hd{position:absolute;left:2cqw;right:2cqw;top:1.1cqw;height:5.8cqw;display:flex;gap:1.4cqw;z-index:4;pointer-events:none}
+.no{background:var(--shiro);color:var(--ink);border:.42cqw solid var(--aka);width:5.8cqw;display:grid;place-items:center;font:900 4.2cqw "Big Shoulders Stencil Display",Impact,sans-serif}
+.tt{display:flex;flex-direction:column;justify-content:center;gap:.6cqw}
+.tt h1{margin:0;font:400 2.35cqw "Dela Gothic One",sans-serif;letter-spacing:-.02em}
+.tt p{margin:0;font:400 1.3cqw "Dela Gothic One",sans-serif;color:var(--kinari2)}
+.rules{margin-left:auto;display:flex;gap:.45cqw}
+.rule{background:var(--shiro);color:var(--ink);border:.2cqw solid #000;padding:0 .85cqw;display:flex;flex-direction:column;justify-content:center;gap:.4cqw}
+.rule b{font:900 2.6cqw "Big Shoulders Stencil Display",Impact,sans-serif}
+.rule span{font:700 1.0cqw "BIZ UDPGothic",sans-serif;white-space:nowrap}
+.rule.ren{background:var(--koku);color:var(--chalk)}
+.rule.ren b{color:var(--sig)}
+.rule.left{background:var(--aka);color:var(--shiro)}
+.flash{
+  position:absolute;left:0;right:0;top:40%;height:11cqw;background:var(--aka);color:var(--shiro);
+  display:flex;align-items:center;justify-content:center;gap:2.4cqw;font:400 4.6cqw "Dela Gothic One",sans-serif;
+  border-block:.6cqw solid var(--shiro);z-index:10;visibility:hidden;pointer-events:none;
+}
+.flash small{font:900 3.6cqw "Big Shoulders Stencil Display",Impact,sans-serif}
+/* 2D 表示（待機・1R結果） */
+.plain{position:absolute;inset:0;z-index:6;background:var(--ai);display:none;padding:9cqw 3cqw 2cqw}
+.plain.on{display:block}
+.plain .msg{display:grid;place-items:center;height:100%;font:400 3cqw "Dela Gothic One",sans-serif;color:var(--kinari2)}
+.r1grid{display:grid;grid-auto-flow:column;gap:.5cqw 1.2cqw;height:100%;align-content:start}
+.r1row{display:flex;align-items:center;gap:.8cqw;background:var(--shiro);color:var(--ink);border-left:1.2cqw solid var(--c,#888);padding:0 1cqw;height:3.6cqw;overflow:hidden}
+.r1row b{font:900 2.2cqw "Big Shoulders Stencil Display",Impact,sans-serif;width:3.4cqw}
+.r1row span{font:400 1.7cqw "Dela Gothic One",sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.r1row i{margin-left:auto;font:700 1.1cqw "BIZ UDPGothic",sans-serif;font-style:normal;white-space:nowrap}
+.fsbtn{
+  position:fixed;right:12px;bottom:12px;z-index:20;font:700 14px "BIZ UDPGothic",sans-serif;
+  background:var(--shiro);color:var(--ink);border:2px solid #000;padding:8px 12px;cursor:pointer;opacity:.85;
+}
+.fsbtn:hover{opacity:1}
+:fullscreen .fsbtn{display:none}
