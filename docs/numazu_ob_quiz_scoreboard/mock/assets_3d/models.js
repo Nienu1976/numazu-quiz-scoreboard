@@ -52,11 +52,13 @@
 
     // 連答権発光枠（札の周囲を囲む4本の細長い枠）
     const glowMat = new THREE.MeshBasicMaterial({ color: 0x3ee08f });
+    // リーチ発光枠（さらに一回り外側の黄金枠）
+    const reachGlowMat = new THREE.MeshBasicMaterial({ color: 0xffbe0b });
 
     // ポップアップ看板ジオメトリ
-    const popGeo = new THREE.PlaneGeometry(1.5, 0.56);
+    const popGeo = new THREE.PlaneGeometry(1.62, 0.6);
 
-    const sideWoodMat = new THREE.MeshToonMaterial({ color: 0xcab996, gradientMap: toonMap });
+    const sideWoodMat = new THREE.MeshToonMaterial({ color: 0xe0d4b8, gradientMap: toonMap });
     const sideRustMat = new THREE.MeshToonMaterial({ color: 0x6b2f15, gradientMap: toonMap });
     const tagSideMat = new THREE.MeshToonMaterial({ color: 0x111815, gradientMap: toonMap });
     const blackLineMat = new THREE.LineBasicMaterial({ color: 0x000000 });
@@ -79,6 +81,7 @@
       seaGeo,
       popGeo,
       glowMat,
+      reachGlowMat,
       sideWoodMat,
       sideRustMat,
       tagSideMat,
@@ -168,6 +171,22 @@
     haloGroup.add(hTop, hBot, hL, hR);
     flipGroup.add(haloGroup);
 
+    // リーチ時の黄金発光フレーム（さらに外周に大きく、脈打ち用）
+    const reachHaloGroup = new THREE.Group();
+    reachHaloGroup.visible = false;
+    reachHaloGroup.position.z = 0.062;
+    const rBarT = 0.075;
+    const rTop = new THREE.Mesh(new THREE.BoxGeometry(2.0, rBarT, 0.025), shared.reachGlowMat);
+    rTop.position.y = 1.24;
+    const rBot = new THREE.Mesh(new THREE.BoxGeometry(2.0, rBarT, 0.025), shared.reachGlowMat);
+    rBot.position.y = -1.24;
+    const rL = new THREE.Mesh(new THREE.BoxGeometry(rBarT, 2.55, 0.025), shared.reachGlowMat);
+    rL.position.x = -0.98;
+    const rR = new THREE.Mesh(new THREE.BoxGeometry(rBarT, 2.55, 0.025), shared.reachGlowMat);
+    rR.position.x = 0.98;
+    reachHaloGroup.add(rTop, rBot, rL, rR);
+    flipGroup.add(reachHaloGroup);
+
     // 連答権・回転灯マスト（札の上部右側）
     const mastGroup = new THREE.Group();
     mastGroup.position.set(0.58, 1.14, 0.02);
@@ -252,6 +271,7 @@
       cardMesh,
       tagPivot,
       haloGroup,
+      reachHaloGroup,
       mastGroup,
       domeMat,
       rotator,
@@ -290,17 +310,17 @@
     // 下部の海面デッキ（濃い海色）
     const deckMat = new THREE.MeshToonMaterial({ color: 0x0a1a33, gradientMap: toonMap });
     const deck = new THREE.Mesh(new THREE.BoxGeometry(30, 0.4, 10), deckMat);
-    deck.position.set(0, -3.55, 0);
+    deck.position.set(0, -3.75, 0);
     deck.receiveShadow = true;
     stageGroup.add(deck);
 
     // 札を支える上下2本の横木レール（沼津港の競り札掛け風）
     const railMat = new THREE.MeshToonMaterial({ color: 0x162947, gradientMap: toonMap });
     const railEdgeMat = new THREE.LineBasicMaterial({ color: 0x060f1d });
-    const railGeo = new THREE.BoxGeometry(13.6, 0.18, 0.24);
+    const railGeo = new THREE.BoxGeometry(13.2, 0.18, 0.24);
     const railEdgeGeo = new THREE.EdgesGeometry(railGeo);
 
-    [1.45, -1.65].forEach((ry) => {
+    [0.85, -2.05].forEach((ry) => {
       const rail = new THREE.Mesh(railGeo, railMat);
       rail.position.set(0, ry, -0.22);
       rail.receiveShadow = true;
@@ -310,19 +330,19 @@
 
     // 左右の港湾支柱（鉄骨フレーム）
     const pillarMat = new THREE.MeshToonMaterial({ color: 0x13233d, gradientMap: toonMap });
-    const pillarGeo = new THREE.BoxGeometry(0.28, 7.2, 0.34);
-    [-6.65, 6.65].forEach((px) => {
+    const pillarGeo = new THREE.BoxGeometry(0.28, 7.6, 0.34);
+    [-6.45, 6.45].forEach((px) => {
       const pillar = new THREE.Mesh(pillarGeo, pillarMat);
-      pillar.position.set(px, -0.1, -0.25);
+      pillar.position.set(px, -0.2, -0.25);
       pillar.add(new THREE.LineSegments(new THREE.EdgesGeometry(pillarGeo), railEdgeMat));
       stageGroup.add(pillar);
     });
 
     // 遠景の港の係船ビット（ボラード）風シルエット（左右端の低い位置に控えめに）
     const bollardGeo = new THREE.CylinderGeometry(0.18, 0.24, 0.7, 8);
-    [-6.1, 6.1].forEach((bx) => {
+    [-5.95, 5.95].forEach((bx) => {
       const b = new THREE.Mesh(bollardGeo, pillarMat);
-      b.position.set(bx, -3.05, 0.7);
+      b.position.set(bx, -3.25, 0.7);
       stageGroup.add(b);
     });
 

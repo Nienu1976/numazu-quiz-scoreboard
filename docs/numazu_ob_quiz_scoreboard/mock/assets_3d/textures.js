@@ -9,30 +9,32 @@
   const PALETTE = {
     ai: '#0e2240',
     sea: '#0a1a33',
-    kinari: '#e9dfc6',
-    kinari2: '#d8ccad',
-    shiro: '#f6f3ec',
-    aka: '#c8102e',
+    kinari: '#f5efe0',
+    kinari2: '#e5dbc2',
+    shiro: '#fcfaf5',
+    aka: '#d61434',
     sabi: '#8c3f1e',
     koku: '#1f2b26',
-    chalk: '#eef0e6',
+    chalk: '#f4f6ee',
     sig: '#3ee08f',
-    ink: '#141414',
+    reach: '#ffbe0b',
+    ink: '#101010',
     plate: {
-      r: { bg: '#c8102e', fg: '#f6f3ec' },
-      b: { bg: '#2058b8', fg: '#f6f3ec' },
-      y: { bg: '#f0b400', fg: '#141414' },
-      g: { bg: '#1d8a4b', fg: '#f6f3ec' }
+      r: { bg: '#d61434', fg: '#fcfaf5' },
+      b: { bg: '#2260cc', fg: '#fcfaf5' },
+      y: { bg: '#f5b800', fg: '#101010' },
+      g: { bg: '#209954', fg: '#fcfaf5' }
     }
   };
 
   /**
    * 3段階トゥーンランプテクスチャ（グラデーションのないくっきりした陰影用）
+   * 最小輝度を高めに保ち、プロジェクターでも札の面が暗くならないようにする
    */
   function createToonGradientMap() {
     const data = new Uint8Array([
-      135, 135, 135, 255,
-      210, 210, 210, 255,
+      205, 205, 205, 255,
+      235, 235, 235, 255,
       255, 255, 255, 255
     ]);
     const tex = new THREE.DataTexture(data, 3, 1, THREE.RGBAFormat);
@@ -61,20 +63,20 @@
    * 札の前面テクスチャを描画・更新する
    * 下部黒板は別メッシュ（tagPivot）でめくれるため、ここは上部の帯・名前・期＋下地を描画
    */
-  function drawCardFront(canvas, player, index, hasStreak, isWin) {
+  function drawCardFront(canvas, player, index, hasStreak, isWin, isReach) {
     const ctx = canvas.getContext('2d');
     const w = canvas.width;
     const h = canvas.height;
     const plate = PALETTE.plate[player.c] || PALETTE.plate.g;
     const pad = String(index + 1).padStart(2, '0');
 
-    // 背景（通常: 生成り、勝ち抜け: 白）
+    // 背景（通常: 明るい生成り、勝ち抜け: 白）
     ctx.fillStyle = isWin ? PALETTE.shiro : PALETTE.kinari;
     ctx.fillRect(0, 0, w, h);
 
     // わずかな木目ストライプ（フラットな離散色）
     if (!isWin) {
-      ctx.fillStyle = '#e2d7bc';
+      ctx.fillStyle = '#ece3cc';
       for (let y = 110; y < h; y += 28) {
         ctx.fillRect(0, y, w, 4);
       }
@@ -131,16 +133,43 @@
     }
     ctx.fillText(player.n, 26, 224);
 
-    // 卒業期
-    ctx.fillStyle = '#5a5244';
+    // 卒業期（左）＋ リーチバッジ（右、名前を隠さない位置）
+    ctx.fillStyle = '#474035';
     ctx.font = '700 38px "BIZ UDPGothic", sans-serif';
     ctx.fillText(`第${player.k}期`, 28, 286);
 
-    // 勝ち抜け時は赤枠の内側アクセント
+    if (isReach && !isWin) {
+      const rw = 204;
+      const rh = 54;
+      const rx = w - rw - 24;
+      const ry = 242;
+      ctx.fillStyle = PALETTE.reach;
+      ctx.fillRect(rx, ry, rw, rh);
+      ctx.lineWidth = 6;
+      ctx.strokeStyle = '#000000';
+      ctx.strokeRect(rx, ry, rw, rh);
+
+      ctx.fillStyle = '#101010';
+      ctx.font = '400 36px "Dela Gothic One", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('リーチ!', rx + rw / 2, ry + rh / 2 + 2);
+    }
+
+    // 状態枠アクセント
     if (isWin) {
       ctx.lineWidth = 14;
       ctx.strokeStyle = PALETTE.aka;
       ctx.strokeRect(12, 12, w - 24, h - 24);
+    } else if (isReach) {
+      ctx.lineWidth = 16;
+      ctx.strokeStyle = PALETTE.reach;
+      ctx.strokeRect(12, 12, w - 24, h - 24);
+      if (hasStreak) {
+        ctx.lineWidth = 8;
+        ctx.strokeStyle = PALETTE.sig;
+        ctx.strokeRect(24, 24, w - 48, h - 48);
+      }
     } else if (hasStreak) {
       ctx.lineWidth = 12;
       ctx.strokeStyle = PALETTE.sig;
@@ -292,23 +321,26 @@
   }
 
   /**
-   * 飛び出しポップアップ（「+1」 / 「連答 +2」）用テクスチャ
+   * 飛び出しポップアップ（「+1」 / 「連答 +2」 / 「リーチ!!」）用テクスチャ
    */
-  function drawPopup(canvas, text, isRen) {
+  function drawPopup(canvas, text, mode) {
     const ctx = canvas.getContext('2d');
     const w = canvas.width;
     const h = canvas.height;
     ctx.clearRect(0, 0, w, h);
 
-    ctx.fillStyle = isRen ? PALETTE.sig : PALETTE.ink;
+    const isRen = mode === true || mode === 'ren';
+    const isReach = mode === 'reach';
+
+    ctx.fillStyle = isReach ? PALETTE.reach : isRen ? PALETTE.sig : PALETTE.ink;
     ctx.fillRect(6, 6, w - 12, h - 12);
 
-    ctx.lineWidth = 10;
-    ctx.strokeStyle = isRen ? '#000000' : PALETTE.shiro;
+    ctx.lineWidth = 12;
+    ctx.strokeStyle = (isReach || isRen) ? '#000000' : PALETTE.shiro;
     ctx.strokeRect(6, 6, w - 12, h - 12);
 
-    ctx.fillStyle = isRen ? '#062814' : PALETTE.shiro;
-    ctx.font = `400 ${isRen ? 72 : 66}px "Dela Gothic One", sans-serif`;
+    ctx.fillStyle = (isReach || isRen) ? '#101010' : PALETTE.shiro;
+    ctx.font = `400 ${isReach ? 82 : isRen ? 72 : 66}px "Dela Gothic One", sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(text, w / 2, h / 2 + 3);

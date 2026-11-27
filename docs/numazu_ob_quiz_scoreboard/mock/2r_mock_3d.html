@@ -37,24 +37,24 @@ body{
 }
 /* 見出し＋ルール（2D HUD） */
 .hd{
-  position:absolute;left:2cqw;right:2cqw;top:1.6cqw;height:7cqw;
-  display:flex;gap:1.6cqw;z-index:4;pointer-events:none;
+  position:absolute;left:2cqw;right:2cqw;top:1.1cqw;height:5.8cqw;
+  display:flex;gap:1.4cqw;z-index:4;pointer-events:none;
 }
 .no{
-  background:var(--shiro);color:var(--ink);border:.5cqw solid var(--aka);
-  width:7cqw;display:grid;place-items:center;
-  font:900 5cqw "Big Shoulders Stencil Display",Impact,sans-serif;
+  background:var(--shiro);color:var(--ink);border:.42cqw solid var(--aka);
+  width:5.8cqw;display:grid;place-items:center;
+  font:900 4.2cqw "Big Shoulders Stencil Display",Impact,sans-serif;
 }
-.tt{display:flex;flex-direction:column;justify-content:center;gap:.9cqw}
-.tt h1{margin:0;font:400 2.7cqw "Dela Gothic One",sans-serif;letter-spacing:-.02em}
-.tt p{margin:0;font:400 1.5cqw "Dela Gothic One",sans-serif;color:var(--kinari2)}
-.rules{margin-left:auto;display:flex;gap:.5cqw}
+.tt{display:flex;flex-direction:column;justify-content:center;gap:.6cqw}
+.tt h1{margin:0;font:400 2.35cqw "Dela Gothic One",sans-serif;letter-spacing:-.02em}
+.tt p{margin:0;font:400 1.3cqw "Dela Gothic One",sans-serif;color:var(--kinari2)}
+.rules{margin-left:auto;display:flex;gap:.45cqw}
 .rule{
   background:var(--shiro);color:var(--ink);border:.2cqw solid #000;
-  padding:0 1cqw;display:flex;flex-direction:column;justify-content:center;gap:.6cqw;
+  padding:0 .85cqw;display:flex;flex-direction:column;justify-content:center;gap:.4cqw;
 }
-.rule b{font:900 3cqw "Big Shoulders Stencil Display",Impact,sans-serif}
-.rule span{font:700 1.1cqw "BIZ UDPGothic",sans-serif;white-space:nowrap}
+.rule b{font:900 2.6cqw "Big Shoulders Stencil Display",Impact,sans-serif}
+.rule span{font:700 1.0cqw "BIZ UDPGothic",sans-serif;white-space:nowrap}
 .rule.ren{background:var(--koku);color:var(--chalk)}
 .rule.ren b{color:var(--sig)}
 .rule.left{background:var(--aka);color:var(--shiro)}
@@ -92,6 +92,8 @@ body{
 .who .st{font-size:13px;white-space:nowrap}
 .who .n{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .who .rk{font-size:12px;background:var(--sig);color:#062814;padding:1px 4px;align-self:flex-start}
+.who .rch{font-size:12px;font-weight:700;background:#ffbe0b;color:#101010;border:1px solid #101010;padding:1px 4px;align-self:flex-start}
+.who .badges{display:flex;gap:3px;flex-wrap:wrap}
 .who.done{opacity:.5}
 .cols button{
   color:#fff;font:700 28px "BIZ UDPGothic",sans-serif;
@@ -203,6 +205,10 @@ body{
   const liteBtn = $('liteBtn');
   const camBtn = $('camBtn');
   const pad = i => String(i + 1).padStart(2, '0');
+  const isReach = i => {
+    const p = S.p[i];
+    return p.st === 'play' && (p.o >= WIN - 1 || (p.o >= WIN - 2 && S.holder === i));
+  };
 
   /* ---- Three.js シーン初期化 ---- */
   const renderer = new THREE.WebGLRenderer({
@@ -218,19 +224,19 @@ body{
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x0e2240);
 
-  // 16:9 ステージ用カメラ（わずかに見下ろす角度）
+  // 16:9 ステージ用カメラ（上段ランプが隠れず、下段まで大きく使う）
   const camera = new THREE.PerspectiveCamera(28, 16 / 9, 0.1, 60);
-  const CAM_STD = { x: 0, y: 1.55, z: 14.3, lookY: -0.22 };
-  const CAM_FRONT = { x: 0, y: -0.22, z: 14.4, lookY: -0.22 };
+  const CAM_STD = { x: 0, y: 1.35, z: 14.0, lookY: 0.14 };
+  const CAM_FRONT = { x: 0, y: 0.14, z: 14.1, lookY: 0.14 };
   camera.position.set(CAM_STD.x, CAM_STD.y, CAM_STD.z);
   camera.lookAt(0, CAM_STD.lookY, 0);
 
-  // ライティング（トゥーン調を引き立てる明確な方向光＋環境光）
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.72);
+  // ライティング（プロジェクターでも札の面がくっきり明るく見える設定）
+  const ambientLight = new THREE.AmbientLight(0xffffff, 1.05);
   scene.add(ambientLight);
 
-  const dirLight = new THREE.DirectionalLight(0xfff8ea, 1.05);
-  dirLight.position.set(4.5, 8.5, 9.5);
+  const dirLight = new THREE.DirectionalLight(0xfffaf0, 1.15);
+  dirLight.position.set(2.5, 6.0, 12.0);
   dirLight.castShadow = true;
   dirLight.shadow.mapSize.set(1024, 1024);
   dirLight.shadow.camera.near = 1;
@@ -241,6 +247,10 @@ body{
   dirLight.shadow.camera.bottom = -5;
   scene.add(dirLight);
 
+  const fillLight = new THREE.DirectionalLight(0xeef6ff, 0.42);
+  fillLight.position.set(-3.5, 2.0, 10.0);
+  scene.add(fillLight);
+
   // 共有アセット＆ステージ＆12枚の札リグ生成
   const maxAniso = renderer.capabilities.getMaxAnisotropy();
   const shared = HM.createSharedAssets(Math.min(maxAniso, 4));
@@ -250,8 +260,8 @@ body{
     const rig = HM.createCardRig(shared, p, i, LOSE);
     const col = i % 6;
     const row = Math.floor(i / 6);
-    const x = (col - 2.5) * 2.08;
-    const y = row === 0 ? 0.92 : -1.96;
+    const x = (col - 2.5) * 1.98;
+    const y = row === 0 ? 0.85 : -2.05;
     rig.root.position.set(x, y, 0);
     scene.add(rig.root);
     return rig;
@@ -275,11 +285,12 @@ body{
     const rig = rigs[i];
     const hasStreak = S.holder === i;
     const isWin = p.st === 'win';
+    const reach = isReach(i);
 
     if (updateFront) {
-      const fKey = `${p.n}|${p.k}|${p.c}|${hasStreak}|${isWin}`;
+      const fKey = `${p.n}|${p.k}|${p.c}|${hasStreak}|${isWin}|${reach}`;
       if (rig.lastFrontKey !== fKey) {
-        HT.drawCardFront(rig.frontCanvas, p, i, hasStreak, isWin);
+        HT.drawCardFront(rig.frontCanvas, p, i, hasStreak, isWin, reach);
         rig.frontTex.needsUpdate = true;
         rig.lastFrontKey = fKey;
       }
@@ -298,9 +309,12 @@ body{
     const p = S.p[i];
     const rig = rigs[i];
     const hasStreak = S.holder === i;
+    const reach = isReach(i);
     const isOutOrWin = p.st !== 'play';
 
     rig.haloGroup.visible = hasStreak;
+    rig.reachHaloGroup.visible = reach;
+    rig.reachHaloGroup.scale.set(1, 1, 1);
     rig.mastGroup.visible = !isOutOrWin;
 
     if (hasStreak) {
@@ -321,9 +335,10 @@ body{
     const p = S.p[i];
     const rig = rigs[i];
     if (G) {
-      G.killTweensOf([rig.motionGroup.position, rig.flipGroup.rotation, rig.tagPivot.rotation, rig.seaMesh.scale, rig.popMesh.position, rig.popMesh.scale]);
+      G.killTweensOf([rig.motionGroup.position, rig.motionGroup.scale, rig.flipGroup.rotation, rig.tagPivot.rotation, rig.seaMesh.scale, rig.popMesh.position, rig.popMesh.scale]);
     }
     rig.motionGroup.position.set(0, p.st === 'out' ? -0.18 : 0, 0);
+    rig.motionGroup.scale.set(1, 1, 1);
     rig.flipGroup.rotation.set(0, p.st === 'out' ? Math.PI : 0, 0);
     rig.tagPivot.rotation.set(0, 0, 0);
     rig.popMesh.visible = false;
@@ -344,7 +359,7 @@ body{
   function renderCtl() {
     const lbl = p => p.st === 'win' ? `${p.rank}抜け` : p.st === 'out' ? '失格' : `${p.o}○ ${p.x}×`;
     cols.innerHTML =
-      S.p.map((p, i) => `<div class="who ${p.c} ${p.st !== 'play' ? 'done' : ''}"><div class="t"><span class="sn">${pad(i)}</span><span class="st">${lbl(p)}</span></div><span class="n">${p.n}</span>${S.holder === i ? '<span class="rk">連答権</span>' : ''}</div>`).join('') +
+      S.p.map((p, i) => `<div class="who ${p.c} ${p.st !== 'play' ? 'done' : ''}"><div class="t"><span class="sn">${pad(i)}</span><span class="st">${lbl(p)}</span></div><span class="n">${p.n}</span><div class="badges">${S.holder === i ? '<span class="rk">連答権</span>' : ''}${isReach(i) ? '<span class="rch">リーチ</span>' : ''}</div></div>`).join('') +
       S.p.map((p, i) => `<button class="bo" data-a="o" data-i="${i}" type="button" ${p.st !== 'play' || S.done ? 'disabled' : ''}>${p.st === 'win' ? '勝ち抜け' : p.st === 'out' ? '失格' : '○'}</button>`).join('') +
       S.p.map((p, i) => `<button class="bx" data-a="x" data-i="${i}" type="button" ${p.st !== 'play' || S.done ? 'disabled' : ''}>${p.st === 'play' ? '×' : '—'}</button>`).join('');
     $('left').textContent = SEATS - S.winners.length;
@@ -394,37 +409,51 @@ body{
       .to(rig.motionGroup.position, { y: 0, z: 0, duration: 0.55, ease: 'bounce.out' });
   }
 
-  function popBanner3D(i, text, isRen) {
+  function popBanner3D(i, text, mode) {
     const rig = rigs[i];
-    HT.drawPopup(rig.popCanvas, text, isRen);
+    const isRen = mode === true || mode === 'ren';
+    const isReachPop = mode === 'reach';
+    HT.drawPopup(rig.popCanvas, text, mode);
     rig.popTex.needsUpdate = true;
     rig.popMesh.visible = true;
 
     if (!G || liteMode) {
       rig.popMesh.position.set(0, 1.38, 0.42);
       rig.popMesh.scale.set(1, 1, 1);
-      setTimeout(() => { rig.popMesh.visible = false; }, isRen ? 900 : 500);
+      setTimeout(() => { rig.popMesh.visible = false; }, (isRen || isReachPop) ? 1000 : 500);
       return;
     }
 
+    const startScale = isReachPop ? 2.1 : isRen ? 1.7 : 0.7;
     const tl = G.timeline({ onComplete: () => { rig.popMesh.visible = false; } });
     tl.fromTo(
       rig.popMesh.position,
       { y: 0.9, z: 0.25 },
-      { y: 1.48, z: 0.55, duration: isRen ? 0.34 : 0.24, ease: isRen ? 'back.out(2.8)' : 'power2.out' }
+      { y: isReachPop ? 1.58 : 1.48, z: isReachPop ? 0.75 : 0.55, duration: (isRen || isReachPop) ? 0.36 : 0.24, ease: 'back.out(2.8)' }
     ).fromTo(
       rig.popMesh.scale,
-      { x: isRen ? 1.7 : 0.7, y: isRen ? 1.7 : 0.7 },
-      { x: 1, y: 1, duration: isRen ? 0.34 : 0.24, ease: 'back.out(2.5)' },
+      { x: startScale, y: startScale },
+      { x: isReachPop ? 1.15 : 1, y: isReachPop ? 1.15 : 1, duration: (isRen || isReachPop) ? 0.36 : 0.24, ease: 'back.out(2.5)' },
       '<'
     ).to(
       rig.popMesh.position,
-      { y: 1.95, duration: 0.42, ease: 'power1.in', delay: isRen ? 1.05 : 0.55 }
+      { y: 2.02, duration: 0.42, ease: 'power1.in', delay: isReachPop ? 1.25 : isRen ? 1.05 : 0.55 }
     ).to(
       rig.popMesh.scale,
       { x: 0.01, y: 0.01, duration: 0.32, ease: 'power1.in' },
       '<0.1'
     );
+  }
+
+  function reachShow3D(i) {
+    const rig = rigs[i];
+    popBanner3D(i, 'リーチ!!', 'reach');
+    if (!G || liteMode) return;
+    G.timeline()
+      .to(rig.motionGroup.scale, { x: 1.1, y: 1.1, z: 1.1, duration: 0.16, ease: 'power2.out' })
+      .to(rig.motionGroup.position, { z: 0.42, duration: 0.16, ease: 'power2.out' }, '<')
+      .to(rig.motionGroup.scale, { x: 1, y: 1, z: 1, duration: 0.45, ease: 'elastic.out(1.2, 0.35)' })
+      .to(rig.motionGroup.position, { z: 0, duration: 0.45, ease: 'elastic.out(1.2, 0.35)' }, '<');
   }
 
   function winShow3D(i) {
@@ -505,6 +534,7 @@ body{
     }
 
     const p = S.p[i];
+    const wasReach = isReach(i);
     if (kind === 'o') {
       const gain = prev === i ? 2 : 1;
       p.o = Math.min(WIN, p.o + gain);
@@ -516,7 +546,8 @@ body{
         S.holder = null;
       }
       if (S.winners.length >= SEATS) S.done = true;
-      S.last = `${pad(i)} ${p.n} ○ ${gain === 2 ? '連答 +2' : '+1'}${p.st === 'win' ? ` → ${p.rank}抜け` : S.holder === i ? '（連答権）' : ''}`;
+      const nowReach = isReach(i);
+      S.last = `${pad(i)} ${p.n} ○ ${gain === 2 ? '連答 +2' : '+1'}${p.st === 'win' ? ` → ${p.rank}抜け` : nowReach ? '（リーチ!）' : S.holder === i ? '（連答権）' : ''}`;
       renderCtl();
 
       if (prev !== null && prev !== i) {
@@ -528,14 +559,18 @@ body{
         syncRigTexture(i, true, false);
         syncMastState(i);
         hopCard3D(i);
-        popBanner3D(i, gain === 2 ? '連答 +2' : '+1', gain === 2);
+        popBanner3D(i, gain === 2 ? '連答 +2' : '+1', gain === 2 ? 'ren' : false);
         winShow3D(i);
       } else {
         syncRigTexture(i, true, false);
         syncMastState(i);
         flipScoreTag3D(i);
-        hopCard3D(i);
-        popBanner3D(i, gain === 2 ? '連答 +2' : '+1', gain === 2);
+        if (!wasReach && nowReach) {
+          reachShow3D(i);
+        } else {
+          hopCard3D(i);
+          popBanner3D(i, gain === 2 ? '連答 +2' : '+1', gain === 2 ? 'ren' : false);
+        }
       }
     } else {
       p.x++;
@@ -623,6 +658,16 @@ body{
       if (!liteMode) {
         const pulse = 1.0 + 0.5 * Math.sin(now * 0.008);
         rig.domeMat.emissiveIntensity = pulse;
+      }
+    }
+
+    // リーチ中の札の黄金外枠をゆったり脈動させる
+    if (!liteMode && !reducedMotion) {
+      const reachPulse = 1.0 + 0.024 * (0.5 + 0.5 * Math.sin(now * 0.006));
+      for (let i = 0; i < rigs.length; i++) {
+        if (rigs[i].reachHaloGroup.visible) {
+          rigs[i].reachHaloGroup.scale.set(reachPulse, reachPulse, 1);
+        }
       }
     }
 
