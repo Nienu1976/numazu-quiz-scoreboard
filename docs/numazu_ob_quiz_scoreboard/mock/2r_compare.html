@@ -1,0 +1,141 @@
+<title>2R 表示案比較</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@700;800&family=Saira+Extra+Condensed:wght@600;800&family=Zen+Kaku+Gothic+New:wght@700;900&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE work（比較検討用）
+   IDEA 3レイアウト×3配色を同じ試合状況で並べ、見比べて選ぶ
+   PICTURE 選択中の案を16:9で大きく、下に9案のサムネイル
+   COLOUR ページはプロジェクター前の暗い会場を模したグレー。各案は自分の配色
+   TYPE ページは BIZ UDPゴシック。各案の書体は案ごと
+   LAYOUT 上に大きなプレビュー、下に 3×3 の一覧（スマホでは1列） */
+:root{color-scheme:dark;--pg:#1b1b1d;--pi:#ecebe7;--pm:#9a9890}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0}
+body{background:var(--pg);color:var(--pi);font:15px/1.6 "Zen Kaku Gothic New",sans-serif}
+.in{padding:20px max(4vw,16px,env(safe-area-inset-right,0px)) 40px max(4vw,16px,env(safe-area-inset-left,0px));max-width:1500px;margin:0 auto}
+h1{font-size:26px;margin:0 0 4px;line-height:1.2}
+.lead{color:var(--pm);margin:0 0 16px;font-size:14px}
+.big{width:min(100%,calc(78vh*16/9))}
+.cap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:10px 0 24px;font-size:14px}
+.cap b{font-size:17px}
+.mx{display:grid;grid-template-columns:7em repeat(3,minmax(0,1fr));gap:10px;align-items:center}
+.mx .h{font-size:13px;color:var(--pm)}
+.th{cursor:pointer;border:0;padding:0;background:none;outline:3px solid transparent;outline-offset:3px}
+.th[aria-pressed=true]{outline-color:#e8e4d8}
+.th:hover{outline-color:#6d6a62}
+@media(max-width:700px){.mx{grid-template-columns:repeat(3,minmax(0,1fr))}.mx .h.r{grid-column:1/-1;margin-top:8px}.mx .h.c{display:none}}
+/* ===== 投影画面（共通） ===== */
+.scr{position:relative;aspect-ratio:16/9;container-type:inline-size;background:var(--bg);color:var(--ink);overflow:hidden;width:100%}
+.scr *{line-height:1}
+.t-dawn{--bg:#0d1f3a;--ink:#f4f1ea;--dim:#23395c;--sub:#8fa0bb;--acc:#e0283f;--fn:"Shippori Mincho",serif;--fw:800;--fd:"Saira Extra Condensed",sans-serif}
+.t-day{--bg:#f3efe6;--ink:#121212;--dim:#d8d1c1;--sub:#6e675a;--acc:#c8102e;--fn:"Zen Kaku Gothic New",sans-serif;--fw:900;--fd:"Barlow Condensed",sans-serif}
+.t-chalk{--bg:#1d2b25;--ink:#e8eee5;--dim:#33453c;--sub:#8fa39a;--acc:#f1cf45;--fn:"Zen Kaku Gothic New",sans-serif;--fw:700;--fd:"Saira Extra Condensed",sans-serif}
+.pr{--pc:#c8102e}.pb{--pc:#2a62c9}.py{--pc:#e9b000}.pg{--pc:#1f9152}
+.hd{position:absolute;left:3cqw;right:3cqw;top:2.4cqw;display:flex;align-items:baseline;gap:2cqw;border-bottom:.15cqw solid var(--sub);padding-bottom:1.2cqw}
+.hd .r{font:800 3.2cqw var(--fd)}
+.hd .t{font:var(--fw) 2.3cqw var(--fn)}
+.hd .q{margin-left:auto;font:600 1.5cqw var(--fn);color:var(--sub)}
+.hd .q b{font:800 2.4cqw var(--fd);color:var(--ink);margin:0 .3cqw}
+.nm{font-family:var(--fn);font-weight:var(--fw)}
+.dg{font-family:var(--fd);font-weight:800}
+/* A 縦ゲージ */
+.A .cols{position:absolute;left:3cqw;right:3cqw;top:11cqw;bottom:2.6cqw;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:1.3cqw}
+.A .line{position:absolute;left:2cqw;right:2cqw;top:13.3cqw;border-top:.25cqw solid var(--ink)}
+.A .line span{position:absolute;right:0;top:-2.2cqw;font:600 1.2cqw var(--fn);color:var(--sub)}
+.A .c{display:flex;flex-direction:column;align-items:center}
+.A .top{height:2.3cqw;font:var(--fw) 1.25cqw var(--fn);color:var(--acc)}
+.A .g{width:100%;display:flex;flex-direction:column-reverse;gap:.45cqw;height:23cqw;margin-top:.3cqw}
+.A .g i{flex:1;background:var(--dim)}
+.A .g i.on{background:var(--ink)}
+.A .g i.nx{background:transparent;outline:.25cqw solid var(--acc);outline-offset:-.25cqw}
+.A .c.win .g i{background:var(--acc)}
+.A .xs{display:flex;gap:.4cqw;margin-top:.9cqw}
+.A .xs i{width:1.6cqw;height:1.6cqw;border:.18cqw solid var(--sub);font:800 1.4cqw var(--fd);font-style:normal;display:grid;place-items:center;color:transparent}
+.A .xs i.on{background:var(--sub);color:var(--bg)}
+.A .nm{writing-mode:vertical-rl;font-size:1.95cqw;margin-top:1.1cqw;letter-spacing:.06em;height:11.6cqw}
+.A .pl{width:2.2cqw;height:.35cqw;background:var(--pc);margin-top:.7cqw}
+.A .sn{font:800 1.4cqw var(--fd);color:var(--sub);margin-top:.5cqw}
+.A .c.out{opacity:.28}
+.A .c.rt .nm{color:var(--acc)}
+.A .rk{font:var(--fw) 1.1cqw var(--fn);background:var(--acc);color:var(--bg);padding:.3cqw .4cqw;position:absolute;transform:translateY(-.4cqw)}
+/* B 横レーン */
+.B .rows{position:absolute;left:3cqw;right:3cqw;top:9.6cqw;bottom:2cqw;display:grid;grid-template-rows:repeat(12,minmax(0,1fr));row-gap:.55cqw}
+.B .ln{display:grid;grid-template-columns:3cqw 15cqw 1fr 9cqw 7cqw;align-items:center;column-gap:1.2cqw;border-left:.45cqw solid var(--pc);padding-left:1cqw}
+.B .sn{font:800 1.8cqw var(--fd);color:var(--sub)}
+.B .nm{font-size:2cqw;white-space:nowrap}
+.B .g{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.5cqw;height:2.5cqw;border-right:.3cqw solid var(--ink);padding-right:.8cqw}
+.B .g i{background:var(--dim)}
+.B .g i.on{background:var(--ink)}
+.B .g i.nx{background:transparent;outline:.22cqw solid var(--acc);outline-offset:-.22cqw}
+.B .ln.win .g i{background:var(--acc)}
+.B .st{font:var(--fw) 1.5cqw var(--fn);color:var(--acc)}
+.B .xs{display:flex;gap:.4cqw}
+.B .xs i{width:1.9cqw;height:1.9cqw;border:.18cqw solid var(--sub);display:grid;place-items:center;font:800 1.6cqw var(--fd);font-style:normal;color:transparent}
+.B .xs i.on{background:var(--sub);color:var(--bg)}
+.B .ln.out{opacity:.28}
+/* C 大数字 */
+.C .grid{position:absolute;left:3cqw;right:3cqw;top:10.4cqw;bottom:2.6cqw;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:1.4cqw 1.6cqw}
+.C .k{border-top:.45cqw solid var(--pc);padding-top:.9cqw;position:relative;display:flex;flex-direction:column}
+.C .sn{font:800 1.5cqw var(--fd);color:var(--sub)}
+.C .nm{font-size:2.2cqw;margin-top:.6cqw;white-space:nowrap}
+.C .o{font:800 7.4cqw var(--fd);margin-top:.2cqw;letter-spacing:-.02em}
+.C .o small{font:var(--fw) 1.6cqw var(--fn);color:var(--sub);margin-left:.4cqw;letter-spacing:0}
+.C .x{font:var(--fw) 1.6cqw var(--fn);color:var(--sub);margin-top:.4cqw;height:1.8cqw}
+.C .k.win .o,.C .k.win .x{color:var(--acc)}
+.C .k.out{opacity:.28}
+.C .tag{position:absolute;right:0;top:1.1cqw;background:var(--acc);color:var(--bg);font:var(--fw) 1.3cqw var(--fn);padding:.45cqw .6cqw}
+.C .k.rt{outline:.3cqw solid var(--acc);outline-offset:.6cqw}
+</style>
+
+<div class="in">
+  <h1>2R 表示画面の比較（3レイアウト × 3配色）</h1>
+  <p class="lead">9案とも同じ試合途中（14問目）の状態です。05 千本松が勝抜、04 ひものが失格、09 狩野川が連答権を持っています。下の一覧から選ぶと上に大きく表示します。</p>
+  <div class="big" id="big"></div>
+  <div class="cap"><span id="capL"></span><span id="capR"></span></div>
+  <div class="mx" id="mx"></div>
+</div>
+
+<script>
+{
+const P = [["しおかぜ","g",0,0],["ぬまっこ","b",3,1],["カツオ番長","y",1,0],["ひもの","g",0,2],["千本松","r",5,0],["香貫山","g",2,0],
+  ["ゆりかもめ","y",1,1],["アジフライ","g",0,0],["狩野川","b",3,0],["深海魚","g",0,1],["びゅうお","y",2,0],["我入道","g",0,0]];
+const HOLD = 8;
+const st = ([, , o, x]) => o >= 5 ? "win" : x >= 2 ? "out" : "";
+const pad = i => String(i+1).padStart(2,"0");
+const xs = x => `<span class="xs">${[0,1].map(k => `<i class="${k<x?"on":""}">×</i>`).join("")}</span>`;
+const gauge = (o, i) => Array.from({length:5}, (_,k) => `<i class="${k<o?"on":(i===HOLD && k<o+2)?"nx":""}"></i>`).join("");
+const head = `<div class="hd"><span class="r">2R</span><span class="t">連答つき 5○2×</span><span class="q">第1組<b>14</b>問目　勝抜<b>1</b>/ 6</span></div>`;
+const L = {
+  A: {name:"縦ゲージ", html:() => head + `<div class="line"><span>勝抜ライン</span></div><div class="cols">` + P.map((p,i) => {
+      const s = st(p);
+      return `<div class="c p${p[1]} ${s} ${i===HOLD?"rt":""}"><span class="top">${s==="win"?"勝抜":s==="out"?"失格":""}</span>
+        <div class="g">${gauge(p[2], i)}</div>${xs(p[3])}${i===HOLD?'<span class="rk">連答権</span>':""}
+        <span class="nm">${p[0]}</span><span class="pl"></span><span class="sn">${pad(i)}</span></div>`; }).join("") + `</div>`},
+  B: {name:"横レーン", html:() => head + `<div class="rows">` + P.map((p,i) => {
+      const s = st(p);
+      return `<div class="ln p${p[1]} ${s}"><span class="sn">${pad(i)}</span><span class="nm">${p[0]}</span>
+        <span class="g">${gauge(p[2], i)}</span><span class="st">${s==="win"?"勝抜":s==="out"?"失格":i===HOLD?"連答権 +2":""}</span>${xs(p[3])}</div>`; }).join("") + `</div>`},
+  C: {name:"大数字", html:() => head + `<div class="grid">` + P.map((p,i) => {
+      const s = st(p);
+      return `<div class="k p${p[1]} ${s} ${i===HOLD?"rt":""}"><span class="sn">${pad(i)}</span><span class="nm">${p[0]}</span>
+        <span class="o">${p[2]}<small>○</small></span><span class="x">${s==="win"?"勝抜":s==="out"?"失格":"×".repeat(p[3]) || "　"}</span>
+        ${i===HOLD?'<span class="tag">連答権</span>':""}</div>`; }).join("") + `</div>`}
+};
+const T = {dawn:"夜明けの藍＋赤1色（明朝＋縦長数字）", day:"昼の岸壁＋墨文字（角ゴシック＋狭いグロテスク）", chalk:"黒板＋チョーク（角ゴシック＋縦長数字）"};
+const scr = (l, t) => `<div class="scr ${l} t-${t}">${L[l].html()}</div>`;
+let cur = ["A","dawn"];
+const mx = document.getElementById("mx");
+mx.innerHTML = `<span class="h c"></span>` + Object.values(T).map(t => `<span class="h c">${t.split("（")[0]}</span>`).join("") +
+  Object.keys(L).map(l => `<span class="h r">${l}　${L[l].name}</span>` +
+    Object.keys(T).map(t => `<button class="th" data-l="${l}" data-t="${t}" aria-label="${L[l].name} ${T[t]}">${scr(l,t)}</button>`).join("")).join("");
+function show(){
+  document.getElementById("big").innerHTML = scr(cur[0], cur[1]);
+  document.getElementById("capL").innerHTML = `<b>${cur[0]}　${L[cur[0]].name}</b>`;
+  document.getElementById("capR").textContent = T[cur[1]];
+  mx.querySelectorAll(".th").forEach(b => b.setAttribute("aria-pressed", b.dataset.l===cur[0] && b.dataset.t===cur[1]));
+}
+mx.addEventListener("click", e => { const b = e.target.closest(".th"); if (!b) return; cur = [b.dataset.l, b.dataset.t]; show(); window.scrollTo({top:0, behavior:"smooth"}); });
+show();
+}
+</script>
