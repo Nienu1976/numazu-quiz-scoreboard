@@ -65,13 +65,13 @@ export async function postEntry(request: Request, env: Env, now = new Date()): P
        SELECT ?, ?, ?, ?, ?, ?,
               CASE WHEN (SELECT COUNT(*) FROM entries WHERE status = 'confirmed') < ? THEN 'confirmed' ELSE 'waitlist' END, ?, ?
        WHERE (? = 'waitlist' OR (SELECT COUNT(*) FROM entries WHERE status = 'confirmed') < ?)`,
-    ).bind(realName, displayName, ki, kana, contact, dedupeKey(realName, ki), cap, iso, iso, siteConfig.entry.overflow, cap).run();
+    ).bind(realName, displayName, ki, kana, contact, dedupeKey(realName, kana), cap, iso, iso, siteConfig.entry.overflow, cap).run();
     if (!res.meta.changes) return err(403, 'full', '定員に達したため受付を締め切りました');
     const id = res.meta.last_row_id as number;
     const row = await env.DB.prepare(`SELECT status FROM entries WHERE id = ?`).bind(id).first<{ status: Status }>();
     return json({ ok: true, receiptNo: receiptNo(id), status: row?.status ?? 'confirmed', displayName }, 201);
   } catch (e) {
-    if (isUnique(e)) return err(409, 'duplicate', '同じ氏名・所属の方がすでにエントリー済みです。心当たりがない場合は運営へご連絡ください');
+    if (isUnique(e)) return err(409, 'duplicate', '同じ氏名・ふりがなの方がすでにエントリー済みです。心当たりがない場合は運営へご連絡ください');
     throw e;
   }
 }
@@ -123,9 +123,9 @@ export async function adminPatch(env: Env, idStr: string, request: Request, now 
     await env.DB.prepare(
       `UPDATE entries SET real_name=?, display_name=?, ki=?, kana=?, contact=?, dedupe_key=?, status=?, updated_at=? WHERE id=?`,
     ).bind(v.value.realName, v.value.displayName, v.value.ki, v.value.kana, v.value.contact,
-      dedupeKey(v.value.realName, v.value.ki), status, now.toISOString(), id).run();
+      dedupeKey(v.value.realName, v.value.kana), status, now.toISOString(), id).run();
   } catch (e) {
-    if (isUnique(e)) return err(409, 'duplicate', '同じ氏名・所属の有効なエントリーがすでにあります');
+    if (isUnique(e)) return err(409, 'duplicate', '同じ氏名・ふりがなの有効なエントリーがすでにあります');
     throw e;
   }
   if (cur.status === 'confirmed' && status !== 'confirmed') await promoteWaitlist(env, now);

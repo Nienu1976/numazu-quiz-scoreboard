@@ -86,18 +86,18 @@ describe('受付期間', () => {
 });
 
 describe('重複・入力検証・ボット対策', () => {
-  it('本名＋卒業期が同じなら 409（全角半角・空白の表記ゆれも同一視）', async () => {
+  it('本名＋ふりがなが同じなら 409（全角半角・空白・カタカナの表記ゆれも同一視。所属が違っても重複）', async () => {
     const env = makeEnv();
-    expect((await send(env, person({ realName: '山田 太郎', ki: '第50期' }))).status).toBe(201);
-    const r = await send(env, person({ realName: '山田　太郎', ki: '第５０期' }));
+    expect((await send(env, person({ realName: '山田 太郎', kana: 'やまだ たろう', ki: '第50期' }))).status).toBe(201);
+    const r = await send(env, person({ realName: '山田　太郎', kana: 'ヤマダタロウ', ki: '会社員' }));
     expect(r.status).toBe(409); expect(r.body.error).toBe('duplicate');
   });
-  it('卒業期が違えば別人。取消後は同じ人が再エントリーできる', async () => {
+  it('ふりがなが違えば同姓同名でも別人。取消後は同じ人が再エントリーできる', async () => {
     const env = makeEnv();
-    const a = await send(env, person({ realName: '田中一郎', ki: '第40期' }));
-    expect((await send(env, person({ realName: '田中一郎', ki: '第41期' }))).status).toBe(201);
+    const a = await send(env, person({ realName: '田中一郎', kana: 'たなかいちろう' }));
+    expect((await send(env, person({ realName: '田中一郎', kana: 'たなかかずお' }))).status).toBe(201);
     await adminCancel(env, a.body.receiptNo);
-    expect((await send(env, person({ realName: '田中一郎', ki: '第40期' }))).status).toBe(201);
+    expect((await send(env, person({ realName: '田中一郎', kana: 'たなかいちろう' }))).status).toBe(201);
   });
   it('必須欠落・ふりがな・連絡先形式・同意なしは 422', async () => {
     const env = makeEnv();

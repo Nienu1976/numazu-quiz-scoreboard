@@ -11,10 +11,11 @@ export function clean(v: unknown): string {
   return v.normalize('NFC').replace(/[\p{Cc}\p{Cf}\p{Zl}\p{Zp}]/gu, '').trim();
 }
 
-/** 重複判定キー: 本名＋所属。NFKC・空白除去・小文字化で表記ゆれを吸収 */
-export function dedupeKey(realName: string, ki: string): string {
-  const n = (s: string) => s.normalize('NFKC').replace(/[\s　]/g, '').toLowerCase();
-  return `${n(realName)}|${n(ki)}`;
+/** 重複判定キー: 本名＋ふりがな。NFKC・空白除去・小文字化・カタカナ→ひらがなで表記ゆれを吸収 */
+export function dedupeKey(realName: string, kana: string): string {
+  const n = (s: string) => s.normalize('NFKC').replace(/[\s\u3000]/g, '').toLowerCase();
+  const hira = (s: string) => s.replace(/[ァ-ヶ]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0x60));
+  return `${n(realName)}|${hira(n(kana))}`;
 }
 
 const KANA_RE = /^[ぁ-ゖァ-ヺー・゛゜\s　]+$/;
