@@ -1,5 +1,5 @@
-// 操作画面（src/control/csv.ts）の読込形式: ヘッダ「氏名,表示名,卒業期,ふりがな,連絡先」。UTF-8(BOM付き)・CRLF
-export const CSV_HEADER = ['氏名', '表示名', '卒業期', 'ふりがな', '連絡先'];
+// 操作画面（src/control/csv.ts）の読込形式: ヘッダ「氏名,表示名,所属,ふりがな,連絡先」。UTF-8(BOM付き)・CRLF
+export const CSV_HEADER = ['氏名', '表示名', '所属', 'ふりがな', '連絡先'];
 
 /** 表計算ソフトで開いたときの数式実行を防ぐ（先頭が = @ タブ、または記号+数字以外の +/-） */
 export function neutralizeFormula(v: string): string {

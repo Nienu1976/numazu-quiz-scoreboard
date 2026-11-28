@@ -2,7 +2,7 @@ export interface EntryInput { realName: string; displayName: string; ki: string;
 
 const LIMITS = { realName: 40, displayName: 20, ki: 30, kana: 60, contact: 100 } as const;
 const LABEL: Record<keyof EntryInput, string> = {
-  realName: '氏名（本名）', displayName: '表示名', ki: '卒業期・所属', kana: 'ふりがな', contact: '連絡先',
+  realName: '氏名（本名）', displayName: '表示名', ki: '所属', kana: 'ふりがな', contact: '連絡先',
 };
 
 /** 制御文字を除去し、前後の空白を落とす（改行・タブも除去） */
@@ -11,7 +11,7 @@ export function clean(v: unknown): string {
   return v.normalize('NFC').replace(/[\p{Cc}\p{Cf}\p{Zl}\p{Zp}]/gu, '').trim();
 }
 
-/** 重複判定キー: 本名＋卒業期。NFKC・空白除去・小文字化で表記ゆれを吸収 */
+/** 重複判定キー: 本名＋所属。NFKC・空白除去・小文字化で表記ゆれを吸収 */
 export function dedupeKey(realName: string, ki: string): string {
   const n = (s: string) => s.normalize('NFKC').replace(/[\s　]/g, '').toLowerCase();
   return `${n(realName)}|${n(ki)}`;

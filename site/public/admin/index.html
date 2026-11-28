@@ -9,8 +9,8 @@
     <a class="btn dark" id="csv" href="/api/admin/export.csv" download>CSV書き出し（確定のみ）</a>
     <a class="btn dark" id="csv2" href="/api/admin/export.csv?include=waitlist" download>CSV（キャンセル待ちも含む）</a>
   </div>
-  <p class="hint">CSVは操作画面の「参加者CSV読込」にそのまま使えます（列：氏名・表示名・卒業期・ふりがな・連絡先）。</p>
-  <div class="tbl-wrap"><table class="adm-t"><thead><tr><th>番号</th><th>状態</th><th>氏名</th><th>ふりがな</th><th>表示名</th><th>卒業期</th><th>連絡先</th><th>受付日時</th><th>操作</th></tr></thead><tbody id="rows"></tbody></table></div>
+  <p class="hint">CSVは操作画面の「参加者CSV読込」にそのまま使えます（列：氏名・表示名・所属・ふりがな・連絡先）。</p>
+  <div class="tbl-wrap"><table class="adm-t"><thead><tr><th>番号</th><th>状態</th><th>氏名</th><th>ふりがな</th><th>表示名</th><th>所属</th><th>連絡先</th><th>受付日時</th><th>操作</th></tr></thead><tbody id="rows"></tbody></table></div>
 </div></section></main>
 <dialog id="dlg"><form method="dialog" id="df">
   <h3 id="dt">エントリーを修正</h3>
@@ -18,7 +18,7 @@
   <div class="row"><label class="l" for="e-realName">氏名</label><input type="text" id="e-realName"></div>
   <div class="row"><label class="l" for="e-kana">ふりがな</label><input type="text" id="e-kana"></div>
   <div class="row"><label class="l" for="e-displayName">表示名</label><input type="text" id="e-displayName"></div>
-  <div class="row"><label class="l" for="e-ki">卒業期・所属</label><input type="text" id="e-ki"></div>
+  <div class="row"><label class="l" for="e-ki">所属</label><input type="text" id="e-ki"></div>
   <div class="row"><label class="l" for="e-contact">連絡先</label><input type="text" id="e-contact"></div>
   <div class="row"><label class="l" for="e-status">状態</label><select id="e-status"><option value="confirmed">確定</option><option value="waitlist">キャンセル待ち</option><option value="cancelled">取消</option></select></div>
   <div class="dlg-btns"><button type="button" class="btn sub dark" id="d-cancel">閉じる</button><button type="submit" class="btn dark" id="d-save">保存</button></div>

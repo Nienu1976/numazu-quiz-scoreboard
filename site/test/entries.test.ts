@@ -156,10 +156,10 @@ describe('CSV 書き出し（操作画面の読込形式）', () => {
     const buf = new Uint8Array(await (await adminCsv(env, new URL('https://x.test/api/admin/export.csv'))).arrayBuffer());
     expect([...buf.slice(0, 3)]).toEqual([0xef, 0xbb, 0xbf]); // UTF-8 BOM（Excel でも文字化けしない）
     const text = new TextDecoder('utf-8', { ignoreBOM: true }).decode(buf);
-    expect(text.slice(1).startsWith('氏名,表示名,卒業期,ふりがな,連絡先\r\n')).toBe(true);
+    expect(text.slice(1).startsWith('氏名,表示名,所属,ふりがな,連絡先\r\n')).toBe(true);
     const players = rowsToPlayers(parseCsv(text));
     expect(players).toHaveLength(2);
-    expect(players[0]).toEqual({ realName: '山田 太郎', displayName: 'カツオ,"番長"', ki: '第50期', kana: 'やまだ たろう', contact: 'a@example.com' });
+    expect(players[0]).toEqual({ realName: '山田 太郎', displayName: 'カツオ,"番長"', affiliation: '第50期', kana: 'やまだ たろう', contact: 'a@example.com' });
     expect(players[1].realName).toBe('鈴木花子');
     const all = rowsToPlayers(parseCsv(await (await adminCsv(env, new URL('https://x.test/?include=waitlist'))).text()));
     expect(all.map((p) => p.realName)).toEqual(['山田 太郎', '鈴木花子', '待ち人']);

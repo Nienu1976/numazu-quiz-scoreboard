@@ -22,7 +22,7 @@ export async function getConfig(env: Env, now = new Date()): Promise<Response> {
   return json(publicConfig(siteConfig, env, entryState(siteConfig, now, c.confirmed), c.confirmed, c.waitlist));
 }
 
-/** 公開リスト。SQL で列を表示名・卒業期に限定し、本名・ふりがな・連絡先は読み出さない */
+/** 公開リスト。SQL で列を表示名・所属に限定し、本名・ふりがな・連絡先は読み出さない */
 export async function listPublic(env: Env): Promise<Response> {
   const { results } = await env.DB.prepare(`SELECT id, display_name, ki FROM entries WHERE status = 'confirmed' ORDER BY id`).all<{ id: number; display_name: string; ki: string }>();
   const c = await counts(env);
@@ -71,7 +71,7 @@ export async function postEntry(request: Request, env: Env, now = new Date()): P
     const row = await env.DB.prepare(`SELECT status FROM entries WHERE id = ?`).bind(id).first<{ status: Status }>();
     return json({ ok: true, receiptNo: receiptNo(id), status: row?.status ?? 'confirmed', displayName }, 201);
   } catch (e) {
-    if (isUnique(e)) return err(409, 'duplicate', '同じ氏名・卒業期の方がすでにエントリー済みです。心当たりがない場合は運営へご連絡ください');
+    if (isUnique(e)) return err(409, 'duplicate', '同じ氏名・所属の方がすでにエントリー済みです。心当たりがない場合は運営へご連絡ください');
     throw e;
   }
 }
@@ -125,7 +125,7 @@ export async function adminPatch(env: Env, idStr: string, request: Request, now 
     ).bind(v.value.realName, v.value.displayName, v.value.ki, v.value.kana, v.value.contact,
       dedupeKey(v.value.realName, v.value.ki), status, now.toISOString(), id).run();
   } catch (e) {
-    if (isUnique(e)) return err(409, 'duplicate', '同じ氏名・卒業期の有効なエントリーがすでにあります');
+    if (isUnique(e)) return err(409, 'duplicate', '同じ氏名・所属の有効なエントリーがすでにあります');
     throw e;
   }
   if (cur.status === 'confirmed' && status !== 'confirmed') await promoteWaitlist(env, now);
