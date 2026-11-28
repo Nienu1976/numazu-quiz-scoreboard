@@ -47,7 +47,7 @@ td input[type=text]{width:100%}
 .who .sn{font-size:20px;color:#fff;padding:0 6px;line-height:1.1}
 .who.r .sn{background:var(--p-r)}.who.b .sn{background:var(--p-b)}.who.y .sn{background:var(--p-y);color:#000}.who.g .sn{background:var(--p-g)}
 .who .n{font-size:15px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.who .ki{font-size:12px;color:#4a4332;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.who .aff{font-size:12px;color:#4a4332;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .who .sc{font-size:16px;white-space:nowrap}
 .who .tag{font-size:12px;padding:1px 4px;align-self:flex-start;color:#fff}
 .who .tag.ren{background:var(--sig);color:#062814;font-weight:700}

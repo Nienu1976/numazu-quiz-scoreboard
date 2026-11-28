@@ -7,7 +7,7 @@ import {
 import type { ParsedPlayer } from './csv';
 
 export interface Player {
-  id: string; entryNo: number; displayName: string; ki: string;
+  id: string; entryNo: number; displayName: string; affiliation: string;
   realName: string; kana: string; contact: string; absent: boolean;
 }
 export type Tab = 'players' | 'r1' | 'r2';
@@ -35,7 +35,14 @@ export function loadData(storage: Pick<Storage, 'getItem'> = localStorage): AppD
     const raw = storage.getItem(STORAGE_KEY);
     if (!raw) return emptyData();
     const d = JSON.parse(raw) as AppData;
-    return d && d.v === 1 ? { ...emptyData(), ...d } : emptyData();
+    if (!d || d.v !== 1) return emptyData();
+    // 旧データ（卒業期 ki）→ 所属 affiliation
+    d.players = (d.players ?? []).map((p) => {
+      const o = p as Player & { ki?: string };
+      const { ki, ...rest } = o;
+      return { ...rest, affiliation: o.affiliation ?? ki ?? '' };
+    });
+    return { ...emptyData(), ...d };
   } catch { return emptyData(); }
 }
 export function saveData(d: AppData, storage: Pick<Storage, 'setItem'> = localStorage) {
@@ -51,7 +58,7 @@ export function addPlayers(d: AppData, list: ParsedPlayer[]): AppData {
   const added: Player[] = list.map((p) => ({ ...p, id: `p${no}`, entryNo: no++, absent: false }));
   return { ...d, nextNo: no, players: [...d.players, ...added] };
 }
-export function updatePlayer(d: AppData, id: string, patch: Partial<Pick<Player, 'displayName' | 'ki' | 'realName' | 'kana' | 'contact' | 'absent'>>): AppData {
+export function updatePlayer(d: AppData, id: string, patch: Partial<Pick<Player, 'displayName' | 'affiliation' | 'realName' | 'kana' | 'contact' | 'absent'>>): AppData {
   if (patch.absent !== undefined && r1Finalized(d)) return d;
   return { ...d, players: d.players.map((p) => (p.id === id ? { ...p, ...patch } : p)) };
 }

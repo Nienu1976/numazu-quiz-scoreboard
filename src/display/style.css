@@ -44,7 +44,7 @@ body{background:#000;color:var(--shiro);font:15px/1.4 "BIZ UDPGothic",sans-serif
 .r1row{display:flex;align-items:center;gap:.8cqw;background:var(--shiro);color:var(--ink);border-left:1.2cqw solid var(--c,#888);padding:0 1cqw;height:3.6cqw;overflow:hidden}
 .r1row b{font:900 2.2cqw "Big Shoulders Stencil Display",Impact,sans-serif;width:3.4cqw}
 .r1row span{font:400 1.7cqw "Dela Gothic One",sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.r1row i{margin-left:auto;font:700 1.1cqw "BIZ UDPGothic",sans-serif;font-style:normal;white-space:nowrap}
+.r1row i{margin-left:auto;max-width:40%;overflow:hidden;text-overflow:ellipsis;font:700 1.1cqw "BIZ UDPGothic",sans-serif;font-style:normal;white-space:nowrap}
 .fsbtn{
   position:fixed;right:12px;bottom:12px;z-index:20;font:700 14px "BIZ UDPGothic",sans-serif;
   background:var(--shiro);color:var(--ink);border:2px solid #000;padding:8px 12px;cursor:pointer;opacity:.85;

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { planTransition, type R2 } from '../diff';
 
 const seat = (n: number, o = 0, x = 0, status: 'play' | 'win' | 'out' = 'play', winOrder: number | null = null, isHolder = false) =>
-  ({ seatNo: n, displayName: `p${n}`, ki: '48', plate: 'green' as const, status, o, x, winOrder, isHolder });
+  ({ seatNo: n, displayName: `p${n}`, affiliation: '48', plate: 'green' as const, status, o, x, winOrder, isHolder });
 const r2 = (seats: R2['seats'], phase: R2['phase'] = 'main', winCount = 0): R2 => ({
   groupIndex: 0, groupCount: 1, label: '第1組', phase, seatsToWin: 6, winCount, questionCount: 0, seats, sdPlayers: [], finalRanking: null,
 });

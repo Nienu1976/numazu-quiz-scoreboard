@@ -1,3 +1,12 @@
+/** 所属などの自由記述を札幅に収める（収まらなければ縮小、最小でも収まらなければ省略記号） */
+function drawFit(ctx, text, x, y, maxW, size, minSize) {
+  let f = size;
+  ctx.font = `700 ${f}px "BIZ UDPGothic", sans-serif`;
+  while (ctx.measureText(text).width > maxW && f > minSize) { f -= 2; ctx.font = `700 ${f}px "BIZ UDPGothic", sans-serif`; }
+  let t = text;
+  while (ctx.measureText(t).width > maxW && t.length > 1) t = t.slice(0, -1);
+  ctx.fillText(t === text ? t : t.slice(0, -1) + '…', x, y);
+}
 /**
  * 2R 3Dスコアボード用 プロシージャルテクスチャ生成モジュール
  * - 沼津港モチーフ（生成り・黒板・船体の赤・錆・駿河湾の藍）
@@ -133,10 +142,9 @@
     }
     ctx.fillText(player.n, 26, 224);
 
-    // 卒業期（左）＋ リーチバッジ（右、名前を隠さない位置）
+    // 所属（左）＋ リーチバッジ（右、名前を隠さない位置）
     ctx.fillStyle = '#474035';
-    ctx.font = '700 38px "BIZ UDPGothic", sans-serif';
-    ctx.fillText((/^\d+$/.test(player.k) ? `第${player.k}期` : String(player.k || "")), 28, 286);
+    drawFit(ctx, String(player.k || ""), 28, 286, 250, 38, 22);
 
     if (isReach && !isWin) {
       const rw = 204;
@@ -212,9 +220,8 @@
     }
     ctx.fillText(player.n, w / 2, 132);
 
-    ctx.font = '700 38px "BIZ UDPGothic", sans-serif';
     ctx.fillStyle = 'rgba(233, 223, 198, 0.85)';
-    ctx.fillText((/^\d+$/.test(player.k) ? `第${player.k}期` : String(player.k || "")), w / 2, 206);
+    drawFit(ctx, String(player.k || ""), w / 2, 206, w - 60, 38, 22);
 
     // 大きな「失格」枠
     const boxW = 300;

@@ -1,4 +1,4 @@
-// 表示画面へ送るデータの組み立て。ここで displayName / ki / 席・得点だけを取り出す（本名・ふりがな・連絡先は触らない）。
+// // 表示画面へ送るデータの組み立て。ここで displayName / affiliation / 席・得点だけを取り出す（本名・ふりがな・連絡先は触らない）。
 import { rank1R } from '../engine';
 import type { DisplayPayload, DisplaySeat } from '../shared/protocol';
 import { r1Finalized, r1State, r2State, type AppData } from './store';
@@ -14,7 +14,7 @@ export function buildPayload(d: AppData, now = Date.now()): DisplayPayload {
       const seats: DisplaySeat[] = s.seats.map((x) => ({
         seatNo: x.seatNo,
         displayName: byId.get(x.playerId)?.displayName ?? '',
-        ki: byId.get(x.playerId)?.ki ?? '',
+        affiliation: byId.get(x.playerId)?.affiliation ?? '',
         plate: rk.plates[x.playerId] ?? null,
         status: x.status, o: x.o, x: x.x, winOrder: x.winOrder,
         isHolder: s.holder === x.playerId,
@@ -40,7 +40,7 @@ export function buildPayload(d: AppData, now = Date.now()): DisplayPayload {
         finalized: fin,
         rows: fin
           ? rk.order.map((id) => ({
-              rank: rk.ranks[id]!, displayName: byId.get(id)!.displayName, ki: byId.get(id)!.ki, plate: rk.plates[id]!,
+              rank: rk.ranks[id]!, displayName: byId.get(id)!.displayName, affiliation: byId.get(id)!.affiliation, plate: rk.plates[id]!,
             }))
           : [],
       },

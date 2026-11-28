@@ -244,7 +244,7 @@ export function createR2View(stage: HTMLElement, canvas: HTMLCanvasElement, flas
   /* ---- 状態の受信 ---- */
   function toState(r2: R2): P[] {
     return r2.seats.map((s) => ({
-      n: s.displayName, k: s.ki, c: s.plate ? PLATE_C[s.plate] : 'g',
+      n: s.displayName, k: s.affiliation, c: s.plate ? PLATE_C[s.plate] : 'g',
       o: s.o, x: s.x, st: s.status, rank: s.winOrder ?? 0, holder: s.isHolder,
     }));
   }
@@ -330,7 +330,7 @@ export function createR2View(stage: HTMLElement, canvas: HTMLCanvasElement, flas
 
   /* ---- フォント読込完了後に全テクスチャを再描画（unicode-range 分割対応） ---- */
   const loadFonts = () => {
-    const txt = S.map((p) => p.n).join('') + '失格抜け勝ち○×第期リーチ連答権正解+0123456789';
+    const txt = S.map((p) => p.n).join('') + '失格抜け勝ち○×リーチ連答権正解+0123456789';
     return Promise.all([
       document.fonts.load('900 40px "Big Shoulders Stencil Display"', '0123456789'),
       document.fonts.load('400 40px "Dela Gothic One"', txt),

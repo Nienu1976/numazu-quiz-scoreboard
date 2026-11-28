@@ -74,7 +74,7 @@ function viewPlayers(): string {
   const rows = data.players.map((p) => `<tr class="${p.absent ? 'dim' : ''}">
     <td class="num">${p.entryNo}</td>
     <td><input type="text" data-chg="pl" data-id="${p.id}" data-f="displayName" value="${esc(p.displayName)}"></td>
-    <td><input type="text" data-chg="pl" data-id="${p.id}" data-f="ki" value="${esc(p.ki)}" style="width:7em"></td>
+    <td><input type="text" data-chg="pl" data-id="${p.id}" data-f="affiliation" value="${esc(p.affiliation)}" style="width:7em"></td>
     <td><input type="text" data-chg="pl" data-id="${p.id}" data-f="realName" value="${esc(p.realName)}"></td>
     <td>${esc(p.kana)}</td><td>${esc(p.contact)}</td>
     <td><label><input type="checkbox" data-chg="absent" data-id="${p.id}" ${p.absent ? 'checked' : ''} ${fin ? 'disabled' : ''}> 欠席</label></td>
@@ -83,11 +83,11 @@ function viewPlayers(): string {
   <div class="panel"><h2>参加者の追加</h2>
     <div class="row">
       <label class="btn navy">CSVを読み込む<input type="file" id="csv" accept=".csv,text/csv,.txt" hidden ${fin ? 'disabled' : ''}></label>
-      <span class="note">列: 氏名, 表示名, 卒業期, ふりがな, 連絡先（1行目が見出しでも無くても可。UTF-8/Shift_JIS）。読み込みは追加されます</span>
+      <span class="note">列: 氏名, 表示名, 所属, ふりがな, 連絡先（1行目が見出しでも無くても可。UTF-8/Shift_JIS）。読み込みは追加されます</span>
     </div>
     <form id="addf" class="row" style="margin-top:10px">
       <input type="text" name="displayName" placeholder="表示名（必須）" required>
-      <input type="text" name="ki" placeholder="卒業期・所属" size="10">
+      <input type="text" name="affiliation" placeholder="所属" size="10">
       <input type="text" name="realName" placeholder="本名（運営のみ）">
       <input type="text" name="kana" placeholder="ふりがな（運営のみ）">
       <input type="text" name="contact" placeholder="連絡先（運営のみ）">
@@ -97,7 +97,7 @@ function viewPlayers(): string {
   </div>
   <div class="panel"><h2>参加者一覧（${data.players.length}人 / 欠席${data.players.filter((p) => p.absent).length}人）</h2>
     <p class="note">本名・ふりがな・連絡先は操作画面だけに表示されます。表示画面には送られません。</p>
-    <div class="scroll"><table><thead><tr><th>受付</th><th>表示名</th><th>卒業期</th><th>本名</th><th>ふりがな</th><th>連絡先</th><th></th><th></th></tr></thead>
+    <div class="scroll"><table><thead><tr><th>受付</th><th>表示名</th><th>所属</th><th>本名</th><th>ふりがな</th><th>連絡先</th><th></th><th></th></tr></thead>
     <tbody>${rows || '<tr><td colspan="8">まだ参加者がいません。CSVを読み込むか、手動で追加してください。</td></tr>'}</tbody></table></div>
     <div class="row" style="margin-top:10px"><button class="btn warn" data-act="reset-all">全データを消去</button></div>
   </div>`;
@@ -112,7 +112,7 @@ function viewR1(): string {
   const rows = data.players.map((p, i) => {
     const r = rk.ranks[p.id];
     const pl = rk.plates[p.id];
-    return `<tr class="${p.absent ? 'dim' : ''}"><td class="num">${p.entryNo}</td><td>${esc(p.displayName)}</td><td>${esc(p.ki)}</td>
+    return `<tr class="${p.absent ? 'dim' : ''}"><td class="num">${p.entryNo}</td><td>${esc(p.displayName)}</td><td>${esc(p.affiliation)}</td>
       <td>${p.absent ? '欠席' : `<input type="number" class="score" data-chg="score" data-id="${p.id}" data-i="${i}" min="0" max="100" step="1" value="${s.scores[p.id] ?? ''}" ${fin ? 'disabled' : ''}>`}</td>
       <td class="num" style="font-size:20px">${r ?? ''}</td>
       <td>${pl ? `<span class="plate ${pl}">${PLATE_JA[pl]}</span>` : ''}</td></tr>`;
@@ -127,7 +127,7 @@ function viewR1(): string {
     </div>
     ${rk.boundaryTies.length && !fin ? `<div class="warn-box">プレート境界（${rk.boundaryTies.map((x) => `${x}位/${x + 1}位`).join('、')}）で同点です。現在は受付番号の小さい順で順位を決めています。主催者の指示と違う場合は確定前に確認してください。</div>` : ''}
     <p class="note">入力して Enter で次の人へ。同点は受付番号の小さい順（暫定 A14）。順位・プレートは入力のたびに更新されます。</p>
-    <div class="scroll"><table><thead><tr><th>受付</th><th>表示名</th><th>卒業期</th><th>点数</th><th>順位</th><th>プレート</th></tr></thead><tbody>${rows || '<tr><td colspan="6">参加者がいません</td></tr>'}</tbody></table></div>
+    <div class="scroll"><table><thead><tr><th>受付</th><th>表示名</th><th>所属</th><th>点数</th><th>順位</th><th>プレート</th></tr></thead><tbody>${rows || '<tr><td colspan="6">参加者がいません</td></tr>'}</tbody></table></div>
   </div>`;
 }
 
@@ -165,7 +165,7 @@ function viewR2(): string {
     return `<div class="who ${pl ? PLATE_CLS[pl] : ''} ${x.status}">
       <div class="t"><span class="sn num">${x.seatNo}</span><span class="sc num">${x.o}○ ${x.x}×</span></div>
       <div class="n" title="${esc(label(x.playerId))}">${esc(label(x.playerId))}</div>
-      <div class="ki">${esc(nameOf(x.playerId)?.ki)}</div>${tags}</div>`;
+      <div class="affiliation">${esc(nameOf(x.playerId)?.affiliation)}</div>${tags}</div>`;
   }).join('');
   const btns = (cls: string, mark: string, ev: 'correct' | 'wrong') => s.seats.map((x) =>
     `<button class="pb ${cls}" data-act="ans" data-ev="${ev}" data-id="${x.playerId}" ${can(x.playerId) ? '' : 'disabled'}>${can(x.playerId) ? mark : (x.status === 'win' ? '勝抜' : x.status === 'out' ? '失格' : '—')}</button>`).join('');
@@ -280,7 +280,7 @@ app.addEventListener('submit', (e) => {
   e.preventDefault();
   const fd = new FormData(f);
   const g = (k: string) => String(fd.get(k) ?? '').trim();
-  set(addPlayers(data, [{ displayName: g('displayName'), ki: g('ki'), realName: g('realName'), kana: g('kana'), contact: g('contact') }]));
+  set(addPlayers(data, [{ displayName: g('displayName'), affiliation: g('affiliation'), realName: g('realName'), kana: g('kana'), contact: g('contact') }]));
 });
 
 render();

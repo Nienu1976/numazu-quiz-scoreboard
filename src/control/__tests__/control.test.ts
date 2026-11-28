@@ -5,18 +5,22 @@ import { addPlayers, emptyData, makeGroups, r1Dispatch, r2Dispatch, r2State, r2U
 
 const mk = (n: number): AppData => {
   let d = emptyData();
-  d = addPlayers(d, Array.from({ length: n }, (_, i) => ({ displayName: `名${i + 1}`, ki: `${i}期`, realName: `本名${i + 1}`, kana: 'かな', contact: 'x@y' })));
+  d = addPlayers(d, Array.from({ length: n }, (_, i) => ({ displayName: `名${i + 1}`, affiliation: `所属${i}`, realName: `本名${i + 1}`, kana: 'かな', contact: 'x@y' })));
   d.players.forEach((p, i) => { d = r1Dispatch(d, { type: 'setScore', playerId: p.id, score: 100 - i }); });
   return r1Dispatch(d, { type: 'finalize' });
 };
 
 describe('csv', () => {
   it('ヘッダ付き・引用符・BOM', () => {
-    const r = rowsToPlayers(parseCsv('﻿氏名,表示名,卒業期,ふりがな,連絡先\r\n"沼津, 太郎",タロ,30期,ぬまづ,a@b\r\n'));
-    expect(r).toEqual([{ realName: '沼津, 太郎', displayName: 'タロ', ki: '30期', kana: 'ぬまづ', contact: 'a@b' }]);
+    const r = rowsToPlayers(parseCsv('﻿氏名,表示名,所属,ふりがな,連絡先\r\n"沼津, 太郎",タロ,Aクラブ,ぬまづ,a@b\r\n'));
+    expect(r).toEqual([{ realName: '沼津, 太郎', displayName: 'タロ', affiliation: 'Aクラブ', kana: 'ぬまづ', contact: 'a@b' }]);
   });
-  it('ヘッダ無しは 氏名,表示名,卒業期,ふりがな,連絡先 の順', () => {
-    expect(rowsToPlayers(parseCsv('山田,ヤマ,25期'))[0]).toMatchObject({ realName: '山田', displayName: 'ヤマ', ki: '25期' });
+  it('旧列名「卒業期」「卒業期・所属」も所属として読む', () => {
+    expect(rowsToPlayers(parseCsv('氏名,表示名,卒業期\n山田,ヤマ,50期'))[0].affiliation).toBe('50期');
+    expect(rowsToPlayers(parseCsv('氏名,表示名,卒業期・所属\n山田,ヤマ,沼津市'))[0].affiliation).toBe('沼津市');
+  });
+  it('ヘッダ無しは 氏名,表示名,所属,ふりがな,連絡先 の順', () => {
+    expect(rowsToPlayers(parseCsv('山田,ヤマ,Bクラブ'))[0]).toMatchObject({ realName: '山田', displayName: 'ヤマ', affiliation: 'Bクラブ' });
   });
 });
 

@@ -53,7 +53,7 @@ function onState(p: DisplayPayload) {
     const rows = p.r1.rows;
     const per = Math.max(10, Math.ceil(rows.length / 3));
     return showPlain(`<div class="r1grid" style="grid-template-rows:repeat(${per},3.6cqw)">${rows.map((r) =>
-      `<div class="r1row" style="--c:${PLATE_VAR[r.plate]}"><b>${r.rank}</b><span>${esc(r.displayName)}</span><i>${esc(r.ki)}　${PLATE_JA[r.plate]}</i></div>`).join('')}</div>`);
+      `<div class="r1row" style="--c:${PLATE_VAR[r.plate]}"><b>${r.rank}</b><span>${esc(r.displayName)}</span><i>${esc(r.affiliation)}　${PLATE_JA[r.plate]}</i></div>`).join('')}</div>`);
   }
   showPlain('<div class="msg">操作画面からの送信待ち…</div>');
 }

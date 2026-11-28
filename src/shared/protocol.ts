@@ -6,7 +6,7 @@ export type PlateKey = 'red' | 'blue' | 'yellow' | 'green';
 export interface DisplaySeat {
   seatNo: number;
   displayName: string;
-  ki: string;
+  affiliation: string;
   plate: PlateKey | null;
   status: 'play' | 'win' | 'out';
   o: number;
@@ -15,7 +15,7 @@ export interface DisplaySeat {
   isHolder: boolean; // 2R 連答権
 }
 
-export interface DisplayR1Row { rank: number; displayName: string; ki: string; plate: PlateKey }
+export interface DisplayR1Row { rank: number; displayName: string; affiliation: string; plate: PlateKey }
 
 export interface DisplayPayload {
   v: 1;
