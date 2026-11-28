@@ -1,0 +1,9 @@
+# ローカル開発用。コピーして .dev.vars にする（.dev.vars はコミットしない）
+# ローカルのみ管理APIの Access 検査を省略する（本番では絶対に設定しない）
+ACCESS_BYPASS_LOCAL=1
+# Turnstile を試す場合のみ（未設定なら無効）。Cloudflare 公式のテスト用キー:
+# TURNSTILE_SITE_KEY=1x00000000000000000000AA
+# TURNSTILE_SECRET=1x0000000000000000000000000000000AA
+# Access の JWT を署名まで検証する場合（本番推奨）
+# CF_ACCESS_TEAM_DOMAIN=yourteam.cloudflareaccess.com
+# CF_ACCESS_AUD=（Access アプリケーションの AUD タグ）

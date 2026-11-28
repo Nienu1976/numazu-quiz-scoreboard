@@ -1,0 +1,22 @@
+{
+  "_comment": "公開サイトの設定はこのファイル1か所。「調整中」を実際の値に書き換えて push すれば反映される。null の項目は『調整中』と表示される",
+  "event": {
+    "name": "沼東OB例会 クイズ大会",
+    "subtitle": "1st",
+    "dateISO": "2027-03-20",
+    "dateLabel": "2027年3月20日（土）",
+    "venue": null,
+    "schedule": null,
+    "fee": null,
+    "terms": null,
+    "inquiry": null
+  },
+  "entry": {
+    "capacity": 60,
+    "overflow": "waitlist",
+    "autoPromote": true,
+    "opensAt": null,
+    "closesAt": null,
+    "privacyNotice": "（個人情報の取り扱い文面は調整中です。本名・ふりがな・連絡先は運営のみが確認し、大会の運営連絡以外には使用しません。公開されるのは表示名と卒業期・所属のみです。）"
+  }
+}

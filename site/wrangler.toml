@@ -1,0 +1,11 @@
+# Cloudflare Pages 設定（entry-dev）。手順: docs/numazu_ob_quiz_scoreboard/cloudflare_setup.md
+name = "numazu-quiz"
+pages_build_output_dir = "public"
+compatibility_date = "2025-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "numazu-entry"
+# ↓ D1 を作成したら、表示された database_id に書き換える（秘密情報ではない）。ローカル開発(--local)ではこのままで動く
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations"

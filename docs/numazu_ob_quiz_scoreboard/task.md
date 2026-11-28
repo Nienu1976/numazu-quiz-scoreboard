@@ -56,8 +56,8 @@
 - [x] 表示画面: 自動投影（Window Management API）— 操作画面「投影開始」。外部ディスプレイ検出→全画面。不可時は通常ウィンドウ＋手動移動案内（実機の複数ディスプレイは未確認） — display-dev
 - [~] 表示画面: ラウンド別表示・演出 — 2R 3Dを display.html に移植済み（src/display/、受信状態の差分から演出、undoは演出なし）。1Rは確定後の順位・プレート色の簡易表示。3R以降は未対応 — display-dev
 - [ ] PWA化（オフライン起動） — display-dev
-- [ ] エントリーページ — entry-dev
-- [ ] GAS（スプレッドシート連携・締切判定） — entry-dev
+- [x] エントリーサイト（LP・エントリー・公開リスト・管理）Cloudflare Pages + D1 — entry-dev（site/、Vitest 24件、手順書 cloudflare_setup.md。デプロイはユーザー作業。未決: 会場/参加費/受付期間/規約/問い合わせ/個人情報文面）
+- [-] GAS — 廃止（Cloudflare D1 に変更。2026-11-28）
 
 ## 3. 検証
 - [x] ルール仕様とエンジンの突き合わせレビュー — qa-reviewer（review_engine.md。重大2・中5・軽微3）
